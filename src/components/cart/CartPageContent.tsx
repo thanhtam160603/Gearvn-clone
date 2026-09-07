@@ -7,12 +7,38 @@ import CartItemStep from "./CartItemStep";
 import CartStepIndicator, { type CartStepId } from "./CartStepIndicator";
 import CartSummary from "./CartSummary";
 import ShippingInforStep from "./ShippingInforStep";
+import { useAppSelector } from "@/hooks/redux-hooks";
+import { selectDetailedCartItems } from "@/store/cart-selectors";
 
 export default function CartPageContent() {
+  const cartItems = useAppSelector(selectDetailedCartItems);
   const [currentStep, setCurrentStep] = useState<CartStepId>("cart");
+  const [deselectedIds, setDeselectedIds] = useState<string[]>([]);
   const [shippingInfo, setShippingInfo] = useState<ShippingFormData | null>(
     null,
   );
+
+  const selectedIds = cartItems
+    .map((item) => item.productId)
+    .filter((productId) => !deselectedIds.includes(productId));
+
+  const selectedSubtotal = cartItems.reduce(
+    (total, item) =>
+      selectedIds.includes(item.productId)
+        ? total + item.totalPrice
+        : total,
+    0,
+  );
+
+  const handleSelectedIdsChange = (nextSelectedIds: string[]) => {
+    const nextSelectedIdSet = new Set(nextSelectedIds);
+
+    setDeselectedIds(
+      cartItems
+        .map((item) => item.productId)
+        .filter((productId) => !nextSelectedIdSet.has(productId)),
+    );
+  };
 
   useEffect(() => {
     const step = new URLSearchParams(window.location.search).get("step");
@@ -52,12 +78,15 @@ export default function CartPageContent() {
             {currentStep === "cart" && (
               <CartItemStep
                 onNext={() => goToStep("shipping")}
+                selectedIds={selectedIds}
+                onSelectedIdsChange={handleSelectedIdsChange}
               />
             )}
 
             {currentStep === "shipping" && (
               <ShippingInforStep
                 onBack={() => goToStep("cart")}
+                selectedIds={selectedIds}
                 onChange={(data) => {
                   setShippingInfo(data);
                   goToStep("confirmation");
@@ -97,7 +126,10 @@ export default function CartPageContent() {
             )}
           </div>
 
-          <CartSummary canSubmit={currentStep === "confirmation"} />
+          <CartSummary
+            canSubmit={currentStep === "confirmation" && selectedIds.length > 0}
+            subtotal={selectedSubtotal}
+          />
         </div>
       </div>
     </main>

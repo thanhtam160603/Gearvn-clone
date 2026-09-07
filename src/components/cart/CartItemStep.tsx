@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import {
     selectCartTotalQuantity,
@@ -13,34 +12,25 @@ import { CheckIcon } from "@heroicons/react/24/solid";
 
 type CartItemStepProps = {
     onNext: () => void;
+    selectedIds: string[];
+    onSelectedIdsChange: (selectedIds: string[]) => void;
 };
 
 
-export default function CartItemStep({ onNext }: CartItemStepProps) {
+export default function CartItemStep({
+    onNext,
+    selectedIds,
+    onSelectedIdsChange,
+}: CartItemStepProps) {
     const cartItems = useAppSelector(selectDetailedCartItems);
     const totalQuantity = useAppSelector(selectCartTotalQuantity);
     const dispatch = useAppDispatch();
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-    useEffect(() => {
-        setSelectedIds((currentIds) => {
-            const validIds = currentIds.filter((id) =>
-                cartItems.some((item) => item.productId === id),
-            );
-
-            if (validIds.length === 0 && cartItems.length > 0) {
-                return cartItems.map((item) => item.productId);
-            }
-
-            return validIds;
-        });
-    }, [cartItems]);
 
     const allSelected =
         cartItems.length > 0 && selectedIds.length === cartItems.length;
 
     const handleSelectAll = () => {
-        setSelectedIds(
+        onSelectedIdsChange(
             allSelected
                 ? []
                 : cartItems.map((item) => item.productId),
@@ -48,15 +38,16 @@ export default function CartItemStep({ onNext }: CartItemStepProps) {
     };
 
     const handleItemSelection = (productId: string, selected: boolean) => {
-        setSelectedIds((currentIds) => {
-            if (selected) {
-                return currentIds.includes(productId)
-                    ? currentIds
-                    : [...currentIds, productId];
-            }
+        if (selected) {
+            onSelectedIdsChange(
+                selectedIds.includes(productId)
+                    ? selectedIds
+                    : [...selectedIds, productId],
+            );
+            return;
+        }
 
-            return currentIds.filter((id) => id !== productId);
-        });
+        onSelectedIdsChange(selectedIds.filter((id) => id !== productId));
     };
 
     const handleRemoveSelected = () => {
@@ -64,7 +55,7 @@ export default function CartItemStep({ onNext }: CartItemStepProps) {
             dispatch(removeItem({ productId }));
         });
 
-        setSelectedIds([]);
+        onSelectedIdsChange([]);
     };
 
     return (
@@ -124,7 +115,8 @@ export default function CartItemStep({ onNext }: CartItemStepProps) {
                 <button 
                     type="button"
                     onClick={onNext}
-                    className="rounded-lg bg-[var(--gearvn-red)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+                    disabled={selectedIds.length === 0}
+                    className="rounded-lg bg-[var(--gearvn-red)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-neutral-300"
                 >
                     Tiếp theo
                 </button>

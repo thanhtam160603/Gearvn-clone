@@ -1,18 +1,16 @@
 "use client";
 
-import { useAppSelector } from "@/hooks/redux-hooks";
-import { selectCartSubtotal } from "@/store/cart-selectors";
 import { formatPrice } from "@/lib/format-price";
 
 type CartSummaryProps = {
   canSubmit?: boolean;
+  subtotal: number;
 };
 
 export default function CartSummary({
   canSubmit = false,
+  subtotal,
 }: CartSummaryProps) {
-  const subtotal = useAppSelector(selectCartSubtotal);
-
   const productDiscount = 0;
   const shippingFee = 0;
   const voucherDiscount = 0;

@@ -8,6 +8,7 @@ import ShippingOrderProducts from "./ShippingOrderProducts";
 type ShippingInforStepProps = {
   onBack: () => void;
   onChange: (data: ShippingFormData) => void;
+  selectedIds: string[];
 };
 
 const initialFormData: ShippingFormData = {
@@ -30,6 +31,7 @@ const initialFormData: ShippingFormData = {
 export default function ShippingInforStep({
   onBack,
   onChange,
+  selectedIds,
 }: ShippingInforStepProps) {
   const [form, setFormData] = useState<ShippingFormData>(initialFormData);
 
@@ -71,7 +73,7 @@ export default function ShippingInforStep({
 
   return (
     <div className="space-y-4">
-      <ShippingOrderProducts />
+      <ShippingOrderProducts selectedIds={selectedIds} />
 
       <section className="rounded-lg bg-white p-4">
         <h2 className="text-base font-semibold text-neutral-900">

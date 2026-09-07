@@ -2,14 +2,19 @@
 import Image from "next/image";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { useAppSelector } from "@/hooks/redux-hooks";
-import { selectCartTotalQuantity, selectDetailedCartItems } from "@/store/cart-selectors";
+import { selectDetailedCartItems } from "@/store/cart-selectors";
 
 import {formatPrice} from "@/lib/format-price";
 import { useState } from "react";
 
-export default function ShippingOrderProducts() {
-    const items = useAppSelector(selectDetailedCartItems);
-    const totalQuantity = useAppSelector(selectCartTotalQuantity);
+type ShippingOrderProductsProps = {
+    selectedIds: string[];
+};
+
+export default function ShippingOrderProducts({ selectedIds }: ShippingOrderProductsProps) {
+    const cartItems = useAppSelector(selectDetailedCartItems);
+    const items = cartItems.filter((item) => selectedIds.includes(item.productId));
+    const totalQuantity = items.reduce((total, item) => total + item.quantity, 0);
 
     const [isExpanded, setIsExpanded] = useState(false);
 
