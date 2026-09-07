@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import StoreProvider from "@/components/StoreProvider";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 export const metadata: Metadata = {
   title: "GEARVN - Thiết bị Gaming & Công nghệ",
@@ -8,8 +10,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="vi" className="h-full antialiased">
-      <body className="flex min-h-full flex-col">{children}</body>
+    <html lang="vi" className="h-full antialiased scroll-smooth" data-scroll-behavior="smooth">
+      <body className="flex min-h-full flex-col">
+        <StoreProvider>
+          {children}
+          <CartDrawer />
+        </StoreProvider>
+      </body>
     </html>
   );
 }

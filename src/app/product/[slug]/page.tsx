@@ -62,8 +62,6 @@ export default async function ProductDetailPage({
         </main>
         <AppFooter />
         <StickyProductBar product={product} />
-        
-        </>
-        
+        </>   
     );
 }

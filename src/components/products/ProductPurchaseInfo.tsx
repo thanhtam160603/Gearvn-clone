@@ -1,17 +1,34 @@
+"use client";
+
 import Image from "next/image";
 import type { Product } from "@/types/product";
 import { formatPrice } from "@/lib/format-price";
 import { MdAddShoppingCart } from "react-icons/md";
+import { addItem, openDrawer } from "@/store/cart-slice";
+import { useAppDispatch } from "@/hooks/redux-hooks";
 
 type ProductPurchaseInfoProps = {
   product: Product;
 };
 
 export default function ProductPurchaseInfo({ product }: ProductPurchaseInfoProps) {
+  const dispatch = useAppDispatch();
+  
   const hasOriginalPrice =
     typeof product.originalPrice === "number" &&
     product.originalPrice > product.salePrice;
   const bundles = product.bundles ?? [];
+  
+  const handleAddToCart = () => {
+    if (product.stockQuantity <= 0) return;
+    dispatch(
+      addItem({
+        productId: product.id,
+        stockQuantity: product.stockQuantity,
+      })
+    );
+    dispatch(openDrawer());
+  }
 
   return (
     <section
@@ -116,6 +133,7 @@ export default function ProductPurchaseInfo({ product }: ProductPurchaseInfoProp
         <button
           type="button"
           className="relative rounded-lg xl:flex items-center justify-center bg-gray-100 px-4 py-3 text-sm font-bold text-gray-800 transition hover:bg-gray-200"
+          onClick={handleAddToCart}
         >
           <MdAddShoppingCart className="inline-block size-8" />
         </button>

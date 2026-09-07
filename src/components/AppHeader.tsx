@@ -11,10 +11,20 @@ import {
 import { homepageCategories, quickLinks } from "@/data/homepage-data";
 import MobileCategoryDrawer from "./MobileCategoryDrawer";
 import SearchBox from "./SearchBox";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
+import { openDrawer } from "@/store/cart-slice";
+import { selectCartTotalQuantity } from "@/store/cart-selectors";
+
 
 export default function AppHeader() {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const dispatch = useAppDispatch();
+  const totalQuantity = useAppSelector(selectCartTotalQuantity);
+
+  const handleCartClick = () => {
+    dispatch(openDrawer());
+  };
 
   useEffect(() => {
     const handleStickyVisibility = (event: Event) => {
@@ -80,10 +90,11 @@ export default function AppHeader() {
               <button
                 type="button"
                 aria-label="Giỏ hàng"
+                onClick={handleCartClick}
                 className="relative flex h-10 items-center gap-1.5 rounded-md px-2 bg-black transition hover:pointer-events-none active:scale-[0.98]"
               >
                 <ShoppingCartIcon className="h-7 w-7" />
-                <span className="absolute right-0.5 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-[var(--gearvn-red)]">0</span>
+                <span className="absolute right-0.5 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-[var(--gearvn-red)]">{totalQuantity}</span>
               </button>
 
               <button

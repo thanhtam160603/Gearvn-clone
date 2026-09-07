@@ -70,6 +70,7 @@ export type Product = {
 
   // Thông tin bán hàng
   status: ProductStatus;
+  stockQuantity: number;
   warranty?: string;
   promotion?: string;
 

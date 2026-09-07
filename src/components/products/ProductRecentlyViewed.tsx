@@ -16,9 +16,9 @@ export default function RecentlyViewedProducts({
   currentProductId,
   products,
 }: RecentlyViewedProductsProps) {
-  const [recentIds, setRecentIds] = useState<string[]>([]);
+    const [recentIds, setRecentIds] = useState<string[]>([]);
 
-  useEffect(() => {
+    useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
 
     let previousIds: string[] = [];
@@ -57,22 +57,22 @@ export default function RecentlyViewedProducts({
     return null;
   }
 
-  return (
-    <section
-      aria-labelledby="recently-viewed-title"
-      className="mt-8 rounded-xl bg-white p-5"
-    >
-      <h2
-        id="recently-viewed-title"
-        className="mb-4 text-xl font-bold text-neutral-900"
+    return (
+      <section
+        aria-labelledby="recently-viewed-title"
+        className="mt-8 rounded-xl bg-white p-5"
       >
-        Sản phẩm đã xem gần đây
-      </h2>
+        <h2
+          id="recently-viewed-title"
+          className="mb-4 text-xl font-bold text-neutral-900"
+        >
+          Sản phẩm đã xem gần đây
+        </h2>
 
-      <ProductCarousel
-        products={recentlyViewedProducts}
-        rows={1}
-      />
-    </section>
-  );
+        <ProductCarousel
+          products={recentlyViewedProducts}
+          rows={1}
+        />
+      </section>
+    );
 }

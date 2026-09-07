@@ -2,15 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
 } from "@heroicons/react/24/solid";
 import type { Product } from "@/types/product";
 import ProductCard from "./ProductCard";
 
 type ProductCarouselProps = {
-  products: Product[];
-  rows?: 1 | 2;
+    products: Product[];
+    rows?: 1 | 2;
 };
 
 export default function ProductCarousel({
