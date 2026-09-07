@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import type { CartState } from '../types/cart';
+import type { CartItem, CartState } from '../types/cart';
 
 const initialState : CartState = {
     items: [],
@@ -64,6 +64,10 @@ const cartSlice = createSlice({
         closeDrawer: (state) => {
             state.isDrawerOpen = false;
         },
+        hydrateCart: (state, action: { payload: CartItem[] }) => {
+            state.items = action.payload;
+            state.isHydrated = true;
+        },
         setHydrated: (state, action: { payload: boolean }) => {
             state.isHydrated = action.payload;
         }
@@ -71,5 +75,5 @@ const cartSlice = createSlice({
     },
 });
 
-export const { addItem, increaseQuantity, decreaseQuantity, setQuantity, removeItem, clearCart, openDrawer, closeDrawer, setHydrated } = cartSlice.actions;
+export const { addItem, increaseQuantity, decreaseQuantity, setQuantity, removeItem, clearCart, openDrawer, closeDrawer, hydrateCart, setHydrated } = cartSlice.actions;
 export const cartReducer = cartSlice.reducer;
