@@ -94,7 +94,7 @@ export default function CartItemRow({
                     type="button"
                     aria-label={`Xóa ${product.name} khỏi giỏ hàng`}
                     onClick={handleRemove}
-                    className="col-start-2 row-start-1 shrink-0 justify-self-end p-1 text-neutral-400 transition hover:text-red-600 md:col-start-4 md:justify-self-start"
+                    className="col-start-2 row-start-1 shrink-0 justify-self-end p-1 text-neutral-400 transition cursor-pointer hover:text-red-600  md:col-start-4 md:justify-self-start"
                 >
                     <FiTrash2 size={17} />
                 </button>
@@ -137,7 +137,7 @@ export default function CartItemRow({
                             type="button"
                             aria-label={`Xóa ${product.name} khỏi giỏ hàng`}
                             onClick={handleRemove}
-                            className="shrink-0 p-1 text-neutral-400 transition hover:text-red-600"
+                            className="shrink-0 p-1 text-neutral-400 transition hover:text-red-600 cursor-pointer"
                         >
                             <FiTrash2 size={17} />
                         </button>

@@ -116,7 +116,7 @@ export default function CartItemStep({
                     type="button"
                     onClick={onNext}
                     disabled={selectedIds.length === 0}
-                    className="rounded-lg bg-[var(--gearvn-red)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-neutral-300"
+                    className="cursor-pointer! rounded-lg bg-[var(--gearvn-red)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-neutral-300"
                 >
                     Tiếp theo
                 </button>

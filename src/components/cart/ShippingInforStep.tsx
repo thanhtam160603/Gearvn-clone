@@ -289,7 +289,7 @@ export default function ShippingInforStep({
           <button
             type="button"
             onClick={onBack}
-            className="rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            className="rounded-lg bg-black px-5 py-3 text-sm font-semibold cursor-pointer! text-white transition hover:bg-neutral-800"
           >
             Quay lại
           </button>
@@ -297,7 +297,7 @@ export default function ShippingInforStep({
           <button
             type="button"
             onClick={handleContinue}
-            className="rounded-lg bg-[var(--gearvn-red)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+            className="rounded-lg bg-[var(--gearvn-red)] px-6 py-3 text-sm cursor-pointer! font-semibold text-white transition hover:bg-red-700"
           >
             Tiếp theo
           </button>

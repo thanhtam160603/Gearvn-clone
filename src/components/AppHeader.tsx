@@ -91,7 +91,7 @@ export default function AppHeader() {
                 type="button"
                 aria-label="Giỏ hàng"
                 onClick={handleCartClick}
-                className="relative flex h-10 items-center gap-1.5 rounded-md px-2 bg-black transition hover:pointer-events-none active:scale-[0.98]"
+                className="relative flex h-10 items-center gap-1.5 rounded-md px-2 bg-black transition active:scale-[0.98] cursor-pointer"
               >
                 <ShoppingCartIcon className="h-7 w-7" />
                 <span className="absolute right-0.5 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-[var(--gearvn-red)]">{totalQuantity}</span>
@@ -100,7 +100,7 @@ export default function AppHeader() {
               <button
                 type="button"
                 aria-label="Tài khoản"
-                className="flex h-10 items-center gap-1.5 rounded-md px-2 bg-black transition hover:pointer-events-none active:scale-[0.98]"
+                className="flex h-10 items-center gap-1.5 rounded-md px-2 bg-black transition hover:pointer-events active:scale-[0.98] cursor-pointer"
               >
                 <UserCircleIcon className="h-7 w-7" />
                 <span className="hidden text-xs font-semibold leading-4 lg:block">Đăng nhập</span>

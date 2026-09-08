@@ -43,7 +43,7 @@ export default function QuantityControl({
                 aria-label="Giảm số lượng"
                 onClick={handleDecrement}
                 disabled={quantity <= 1}
-                className="flex size-8 items-center justify-center text-neutral-600 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+                className="flex size-8 items-center justify-center text-neutral-600 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400 cursor-pointer"
             >
                 <FaMinus className="size-3" />
             </button>
@@ -55,7 +55,7 @@ export default function QuantityControl({
                 aria-label="Tăng số lượng"
                 onClick={handleIncrement}
                 disabled={quantity >= stockQuantity}
-                className="flex size-8 items-center justify-center text-neutral-700 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+                className="flex size-8 items-center justify-center text-neutral-700 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400 cursor-pointer"
             >
                 <FaPlus className="size-3" />
             </button>
