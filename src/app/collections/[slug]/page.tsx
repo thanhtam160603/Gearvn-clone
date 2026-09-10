@@ -1,7 +1,7 @@
 import {notFound} from "next/navigation";
 
 import AppHeader from "@/components/AppHeader";
-import AppFooter from "@/components/AppFooter";
+import AppFooter from "@/components/common/AppFooter";
 import CollectionToolbar from "@/components/collections/CollectionToolbar";
 import CollectionProductGrid from "@/components/collections/CollectionProductGrid";
 import CollectionPagination from "@/components/collections/CollectionPagination";

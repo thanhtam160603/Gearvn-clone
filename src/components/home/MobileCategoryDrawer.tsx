@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { HomepageCategory } from "@/data/homepage-data";
-import CategoryMenu from "./CategoryMenu";
+import CategoryMenu from "./home/CategoryMenu";
 
 type MobileCategoryDrawerProps = {
   open: boolean;

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import StoreProvider from "@/components/StoreProvider";
+import StoreProvider from "@/components/common/StoreProvider";
 import CartDrawer from "@/components/cart/CartDrawer";
-import CartPersistence from "@/components/CartPersistence";
+import CartPersistence from "@/components/cart/CartPersistence";
 
 export const metadata: Metadata = {
   title: "GEARVN - Thiết bị Gaming & Công nghệ",

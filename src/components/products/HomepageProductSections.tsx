@@ -1,6 +1,6 @@
 import { products, productSectionConfigs } from "@/data/products";
 import ProductSection from "./ProductSection";
-import PromoStrip1 from "../PromoStrip1";
+import PromoStrip1 from "../home/PromoStrip1";
 
 export default function HomepageProductSections() {
   return (

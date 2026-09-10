@@ -72,8 +72,8 @@ export default function CategoryMenu({
 
                 }}
                 className={`group flex w-full items-center gap-3 rounded-md text-left transition ${compact
-                    ? "min-h-11 px-3 py-2 text-sm"
-                    : "min-h-8 px-2.5 py-1 text-[13px]"
+                  ? "min-h-11 px-3 py-2 text-sm"
+                  : "min-h-8 px-2.5 py-1 text-[13px]"
                   } ${isActive
                     ? "bg-red-50 text-[var(--gearvn-red)]"
                     : "text-gray-800 hover:bg-red-50 hover:text-[var(--gearvn-red)]"
@@ -81,8 +81,8 @@ export default function CategoryMenu({
               >
                 <Icon
                   className={`h-[18px] w-[18px] shrink-0 ${isActive
-                      ? "text-[var(--gearvn-red)]"
-                      : "text-gray-700"
+                    ? "text-[var(--gearvn-red)]"
+                    : "text-gray-700"
                     }`}
                 />
 
