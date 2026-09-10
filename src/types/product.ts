@@ -4,7 +4,10 @@ export type ProductSectionId =
   | "laptop-van-phong"
   | "mouse"
   | "keyboard"
-  | "monitor";
+  | "monitor"
+  | "case-cooling-psu"
+  | "mainboard"
+  | "storage";
 
 export type ProductStatus =
   | "in-stock"
@@ -43,6 +46,51 @@ export type ProductContentSection = {
   images?: string[];
 };
 
+export type ProductFilterAttributeKey =
+  // Thuộc tính dùng cho các nhóm sản phẩm trên trang chủ
+  | "cpu"
+  | "gpu"
+  | "vga"
+  | "ram"
+  | "ssd"
+  | "mainboard"
+  | "screen"
+  | "size"
+  | "panel"
+  | "resolution"
+  | "refreshRate"
+  | "backlight"
+  | "connection"
+  | "dpi"
+  | "weight"
+  | "feature"
+  | "layout"
+  | "productType"
+  | "color"
+  | "caseSize"
+  | "motherboardSupport"
+  | "wattage"
+  | "efficiency"
+  | "modular"
+  | "coolerType"
+  | "radiatorSize"
+  | "socketSupport"
+  | "cpuBrand"
+  | "socket"
+  | "chipset"
+  | "ramType"
+  | "formFactor"
+  | "wifi"
+  | "memorySlots"
+  | "capacity"
+  | "interface"
+  | "protocol"
+  | "useCase";
+
+export type ProductFilterAttributes = Partial<
+  Record<ProductFilterAttributeKey, string[]>
+>;
+
 export type Product = {
   // Định danh và điều hướng
   id: string;
@@ -67,6 +115,7 @@ export type Product = {
 
   // Phân loại và lọc
   tags: string[];
+  filterAttributes?: ProductFilterAttributes;
 
   // Thông tin bán hàng
   status: ProductStatus;

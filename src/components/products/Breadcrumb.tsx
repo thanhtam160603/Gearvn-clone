@@ -14,6 +14,12 @@ const sectionLabels: Record<Product["section"], {
     mouse: { label: "Chuột", href: "/products/mouse" },
     keyboard: { label: "Bàn phím", href: "/products/keyboard" },
     monitor: { label: "Màn hình", href: "/products/monitor" },
+    "case-cooling-psu": {
+        label: "Case, Nguồn, Tản nhiệt",
+        href: "/collections/case-nguon-tan-nhiet",
+    },
+    mainboard: { label: "Mainboard", href: "/collections/mainboard" },
+    storage: { label: "Ổ cứng SSD", href: "/collections/o-cung-ssd" },
 }
 
 export default function Breadcrumb({ section, productName }: BreadcrumbProps) {

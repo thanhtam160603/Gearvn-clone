@@ -19,6 +19,10 @@ export default function MobileCategoryDrawer({
   useEffect(() => {
     if (!open) return;
 
+    const isMobile = window.innerWidth < 1024;
+
+    if (!isMobile) return;
+
     const previousOverflow = document.body.style.overflow;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();

@@ -7,6 +7,7 @@ import {
   Bars3Icon,
   ShoppingCartIcon,
   UserCircleIcon,
+  XMarkIcon
 } from "@heroicons/react/24/outline";
 import { homepageCategories, quickLinks } from "@/data/homepage-data";
 import MobileCategoryDrawer from "./MobileCategoryDrawer";
@@ -14,17 +15,24 @@ import SearchBox from "./SearchBox";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { openDrawer } from "@/store/cart-slice";
 import { selectCartTotalQuantity } from "@/store/cart-selectors";
+import DesktopCategoryOverlay from "./DesktopCategoryOverlay";
+import { selectIsCategoryOverlayOpen } from "@/store/ui-selectors";
+import {
+  closeCategoryOverlay,
+  toggleCategoryOverlay,
+} from "@/store/ui-slice";
 
 
 export default function AppHeader() {
-  const [categoryOpen, setCategoryOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const dispatch = useAppDispatch();
   const totalQuantity = useAppSelector(selectCartTotalQuantity);
+  const categoryOpen = useAppSelector(selectIsCategoryOverlayOpen);
 
   const handleCartClick = () => {
     dispatch(openDrawer());
   };
+
 
   useEffect(() => {
     const handleStickyVisibility = (event: Event) => {
@@ -73,13 +81,18 @@ export default function AppHeader() {
 
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 md:flex-nowrap md:gap-3">
               <button
-                type="button"
-                aria-label="Mở danh mục sản phẩm"
-                aria-expanded={categoryOpen}
-                onClick={() => setCategoryOpen(true)}
-                className="flex h-10 shrink-0 items-center gap-2 rounded-md bg-[#be0015] px-2.5 text-sm font-semibold transition hover:bg-[#a90012] active:scale-[0.98] md:px-3"
+                  type="button"
+                  aria-label={categoryOpen ? "Đóng danh mục sản phẩm" : "Mở danh mục sản phẩm"}
+                  aria-expanded={categoryOpen}
+                  onClick={() => dispatch(toggleCategoryOverlay())}
+                  className="flex h-10 shrink-0 items-center gap-2 rounded-md bg-[#be0015] px-2.5 text-sm font-semibold transition hover:bg-[#a90012] active:scale-[0.98] md:px-3"
               >
-                <Bars3Icon className="h-6 w-6" />
+                {categoryOpen ? (
+                  <XMarkIcon className="h-6 w-6" />
+                ) : (
+                  <Bars3Icon className="h-6 w-6" />
+                )}
+
                 <span className="hidden lg:inline">Danh mục</span>
               </button>
 
@@ -126,10 +139,16 @@ export default function AppHeader() {
         </nav>
       </header>
 
+      <DesktopCategoryOverlay
+        open={categoryOpen}
+        categories={homepageCategories}
+        onClose={() => dispatch(closeCategoryOverlay())}
+      />
+
       <MobileCategoryDrawer
         open={categoryOpen}
         categories={homepageCategories}
-        onClose={() => setCategoryOpen(false)}
+        onClose={() => dispatch(closeCategoryOverlay())}
       />
     </>
   );

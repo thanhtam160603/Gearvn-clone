@@ -6,16 +6,20 @@ import type { HomepageCategory } from "@/data/homepage-data";
 import { categoryMenuData } from "@/data/category-menu-data";
 import MegaCategoryPanel from "./MegaCategoryPanel";
 
+import Link from "next/link";
+
 type CategoryMenuProps = {
   categories: HomepageCategory[];
   onSelect?: (id: string) => void;
   compact?: boolean;
+  href?: string;
 };
 
 export default function CategoryMenu({
   categories,
   onSelect,
   compact = false,
+  href,
 }: CategoryMenuProps) {
     const [activeCategoryId, setActiveCategoryId] = useState<string | null>(
     null
@@ -47,7 +51,8 @@ export default function CategoryMenu({
               }
             }}
           >
-            <button
+            <Link
+              href={href || "#"}
               type="button"
               aria-expanded={isActive}
               onFocus={() => {
@@ -61,6 +66,8 @@ export default function CategoryMenu({
                 }
 
                 onSelect?.(id);
+
+
               }}
               className={`group flex w-full items-center gap-3 rounded-md text-left transition ${
                 compact
@@ -85,7 +92,7 @@ export default function CategoryMenu({
               </span>
 
               <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 text-gray-400" />
-            </button>
+            </Link>
           </li>
         );
       })}
