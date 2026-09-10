@@ -7,7 +7,14 @@ export type ProductSectionId =
   | "monitor"
   | "case-cooling-psu"
   | "mainboard"
-  | "storage";
+  | "storage"
+  | "audio-video"
+  | "headset"
+  | "chair-desk"
+  | "software-network"
+  | "console"
+  | "accessories"
+  | "services";
 
 export type ProductStatus =
   | "in-stock"

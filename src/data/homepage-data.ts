@@ -18,6 +18,7 @@ import { MdChair, MdMonitor, MdOutlineCable, MdReceiptLong } from "react-icons/m
 
 export type HomepageCategory = {
   id: string;
+  slug: string;
   label: string;
   icon: IconType;
 };
@@ -35,22 +36,22 @@ export type HeroSlide = {
 };
 
 export const homepageCategories: HomepageCategory[] = [
-  { id: "laptop", label: "Laptop", icon: FaLaptop },
-  { id: "laptop-gaming", label: "Laptop Gaming", icon: FaGamepad },
-  { id: "pc-gvn", label: "PC GVN", icon: MdMonitor },
-  { id: "main-cpu-vga", label: "Main, CPU, VGA", icon: BsGpuCard },
-  { id: "case-nguon-tan", label: "Case, Nguồn, Tản", icon: FaBoxOpen },
-  { id: "storage-memory", label: "Ổ cứng, RAM, Thẻ nhớ", icon: BsDeviceSsd },
-  { id: "audio-video", label: "Loa, Micro, Webcam", icon: FaHeadphones },
-  { id: "monitor", label: "Màn hình", icon: MdMonitor },
-  { id: "keyboard", label: "Bàn phím", icon: FaKeyboard },
-  { id: "mouse", label: "Chuột + Lót chuột", icon: FaComputerMouse },
-  { id: "headset", label: "Tai nghe", icon: FaHeadphones },
-  { id: "chair-desk", label: "Ghế - Bàn", icon: MdChair },
-  { id: "software-network", label: "Phần mềm, mạng", icon: FaNetworkWired },
-  { id: "console", label: "Handheld, Console", icon: FaGamepad },
-  { id: "accessories", label: "Phụ kiện (Hub, sạc, cáp...)", icon: MdOutlineCable },
-  { id: "services", label: "Dịch vụ và thông tin khác", icon: FaMicrochip },
+  { id: "laptop", slug: "laptop", label: "Laptop", icon: FaLaptop },
+  { id: "laptop-gaming", slug: "laptop-gaming", label: "Laptop Gaming", icon: FaGamepad },
+  { id: "pc-gvn", slug: "pc-gvn", label: "PC GVN", icon: MdMonitor },
+  { id: "main-cpu-vga", slug: "main-cpu-vga", label: "Main, CPU, VGA", icon: BsGpuCard },
+  { id: "case-nguon-tan", slug: "case-nguon-tan-nhiet", label: "Case, Nguồn, Tản", icon: FaBoxOpen },
+  { id: "storage-memory", slug: "o-cung-ssd", label: "Ổ cứng, RAM, Thẻ nhớ", icon: BsDeviceSsd },
+  { id: "audio-video", slug: "audio-video", label: "Loa, Micro, Webcam", icon: FaHeadphones },
+  { id: "monitor", slug: "man-hinh", label: "Màn hình", icon: MdMonitor },
+  { id: "keyboard", slug: "ban-phim", label: "Bàn phím", icon: FaKeyboard },
+  { id: "mouse", slug: "chuot-may-tinh", label: "Chuột + Lót chuột", icon: FaComputerMouse },
+  { id: "headset", slug: "headset", label: "Tai nghe", icon: FaHeadphones },
+  { id: "chair-desk", slug: "chair-desk", label: "Ghế - Bàn", icon: MdChair },
+  { id: "software-network", slug: "software-network", label: "Phần mềm, mạng", icon: FaNetworkWired },
+  { id: "console", slug: "console", label: "Handheld, Console", icon: FaGamepad },
+  { id: "accessories", slug: "accessories", label: "Phụ kiện (Hub, sạc, cáp...)", icon: MdOutlineCable },
+  { id: "services", slug: "services", label: "Dịch vụ và thông tin khác", icon: FaMicrochip },
 ];
 
 export const quickLinks: HeaderLink[] = [
@@ -80,19 +81,23 @@ export const promoBanners1: HeroSlide[] = [
 ];
 
 export const heroRightBanners = [
-  { id: "biuld-pc",
+  {
+    id: "biuld-pc",
     src: "/right-banner-1.webp",
     alt: "Build PC tặng màn 240Hz",
   },
-  { id: "keyboard-promo",
+  {
+    id: "keyboard-promo",
     src: "/right-banner-2.webp",
     alt: "Bàn phím máy tính t7/2026",
   },
-  { id: "pc-i5/5090",
+  {
+    id: "pc-i5/5090",
     src: "/right-banner-3.webp",
     alt: "Tặng màn Gaming 200Hz",
   },
-  { id: "laptop-gaming",
+  {
+    id: "laptop-gaming",
     src: "/right-banner-4.webp",
     alt: "Hè săn Lap giá top",
   },

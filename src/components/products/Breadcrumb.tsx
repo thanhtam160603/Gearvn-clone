@@ -20,6 +20,13 @@ const sectionLabels: Record<Product["section"], {
     },
     mainboard: { label: "Mainboard", href: "/collections/mainboard" },
     storage: { label: "Ổ cứng SSD", href: "/collections/o-cung-ssd" },
+    "audio-video": { label: "Loa, Micro, Webcam", href: "/collections/audio-video" },
+    headset: { label: "Tai nghe", href: "/collections/headset" },
+    "chair-desk": { label: "Ghế - Bàn", href: "/collections/chair-desk" },
+    "software-network": { label: "Phần mềm, mạng", href: "/collections/software-network" },
+    console: { label: "Handheld, Console", href: "/collections/console" },
+    accessories: { label: "Phụ kiện", href: "/collections/accessories" },
+    services: { label: "Dịch vụ", href: "/collections/services" },
 }
 
 export default function Breadcrumb({ section, productName }: BreadcrumbProps) {

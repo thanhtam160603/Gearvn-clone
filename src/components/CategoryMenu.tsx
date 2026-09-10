@@ -21,86 +21,88 @@ export default function CategoryMenu({
   compact = false,
   href,
 }: CategoryMenuProps) {
-    const [activeCategoryId, setActiveCategoryId] = useState<string | null>(
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(
     null
-    );
+  );
 
-    const activeMenu = categoryMenuData.find(
-      (menu) => menu.id === activeCategoryId
-    );
+  const activeMenu = categoryMenuData.find(
+    (menu) => menu.id === activeCategoryId
+  );
+  const activeCategory = categories.find(
+    (category) => category.id === activeCategoryId,
+  );
   return (
-  <nav
-    aria-label="Danh mục sản phẩm"
-    className="relative w-full bg-white"
-    onMouseLeave={() => {
-      if (!compact) {
-        setActiveCategoryId(null);
-      }
-    }}
-  >
-    <ul className={compact ? "space-y-0.5" : "space-y-px"}>
-      {categories.map(({ id, label, icon: Icon }) => {
-        const isActive = activeCategoryId === id;
+    <nav
+      aria-label="Danh mục sản phẩm"
+      className="relative w-full bg-white"
+      onMouseLeave={() => {
+        if (!compact) {
+          setActiveCategoryId(null);
+        }
+      }}
+    >
+      <ul className={compact ? "space-y-0.5" : "space-y-px"}>
+        {categories.map(({ id, slug, label, icon: Icon }) => {
+          const isActive = activeCategoryId === id;
 
-        return (
-          <li
-            key={id}
-            onMouseEnter={() => {
-              if (!compact) {
-                setActiveCategoryId(id);
-              }
-            }}
-          >
-            <Link
-              href={href || "#"}
-              type="button"
-              aria-expanded={isActive}
-              onFocus={() => {
+          return (
+            <li
+              key={id}
+              onMouseEnter={() => {
                 if (!compact) {
                   setActiveCategoryId(id);
                 }
               }}
-              onClick={() => {
-                if (!compact) {
-                  setActiveCategoryId(id);
-                }
-
-                onSelect?.(id);
-
-
-              }}
-              className={`group flex w-full items-center gap-3 rounded-md text-left transition ${
-                compact
-                  ? "min-h-11 px-3 py-2 text-sm"
-                  : "min-h-8 px-2.5 py-1 text-[13px]"
-              } ${
-                isActive
-                  ? "bg-red-50 text-[var(--gearvn-red)]"
-                  : "text-gray-800 hover:bg-red-50 hover:text-[var(--gearvn-red)]"
-              }`}
             >
-              <Icon
-                className={`h-[18px] w-[18px] shrink-0 ${
-                  isActive
-                    ? "text-[var(--gearvn-red)]"
-                    : "text-gray-700"
-                }`}
-              />
+              <Link
+                href={href || (slug ? `/collections/${slug}` : "#")}
+                aria-expanded={isActive}
+                onFocus={() => {
+                  if (!compact) {
+                    setActiveCategoryId(id);
+                  }
+                }}
+                onClick={() => {
+                  if (!compact) {
+                    setActiveCategoryId(id);
+                  }
 
-              <span className="min-w-0 flex-1 leading-5">
-                {label}
-              </span>
+                  onSelect?.(id);
 
-              <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 text-gray-400" />
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
 
-    {!compact && activeMenu && (
-      <MegaCategoryPanel menu={activeMenu} />
-    )}
-  </nav>
-);
+                }}
+                className={`group flex w-full items-center gap-3 rounded-md text-left transition ${compact
+                    ? "min-h-11 px-3 py-2 text-sm"
+                    : "min-h-8 px-2.5 py-1 text-[13px]"
+                  } ${isActive
+                    ? "bg-red-50 text-[var(--gearvn-red)]"
+                    : "text-gray-800 hover:bg-red-50 hover:text-[var(--gearvn-red)]"
+                  }`}
+              >
+                <Icon
+                  className={`h-[18px] w-[18px] shrink-0 ${isActive
+                      ? "text-[var(--gearvn-red)]"
+                      : "text-gray-700"
+                    }`}
+                />
+
+                <span className="min-w-0 flex-1 leading-5">
+                  {label}
+                </span>
+
+                <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+
+      {!compact && activeMenu && (
+        <MegaCategoryPanel
+          menu={activeMenu}
+          href={activeCategory?.slug ? `/collections/${activeCategory.slug}` : "#"}
+        />
+      )}
+    </nav>
+  );
 }

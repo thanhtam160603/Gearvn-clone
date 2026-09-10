@@ -1,20 +1,22 @@
+import Link from "next/link";
 import { CategoryMenu } from "@/types/category-menu";
 
 type MegaCategoryPanelProps = {
     menu: CategoryMenu;
+    href: string;
 };
 
 
-export default function MegaCategoryPanel({ menu }: MegaCategoryPanelProps) {
+export default function MegaCategoryPanel({ menu, href }: MegaCategoryPanelProps) {
     return (
         <div className="absolute left-[260px] top-0 shrink-0 px-6 z-[45] ">
             <div className="bg-white shadow-lg border border-neutral-200 rounded-lg max-h-[556px]" style={{ width: "912px" }}>
                 <div className="flex flex-col gap-2 h-full p-6">
                     <div className="flex items-center font-bold justify-between py-4">
                         <h3>{menu.title}</h3>
-                        <a href={menu.id} className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                        <Link href={href} className="text-sm font-medium text-blue-600 hover:text-blue-800">
                             Xem tất cả
-                        </a>
+                        </Link>
                     </div>
                     <div className="flex flex-1 flex-col gap-8 overflow-y-auto min-h-0">
                         <div className="flex flex-wrap  gap-x-8 gap-y-7">
