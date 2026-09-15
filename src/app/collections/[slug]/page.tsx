@@ -1,6 +1,6 @@
 import {notFound} from "next/navigation";
 
-import AppHeader from "@/components/AppHeader";
+import AppHeader from "@/components/common/AppHeader";
 import AppFooter from "@/components/common/AppFooter";
 import CollectionToolbar from "@/components/collections/CollectionToolbar";
 import CollectionProductGrid from "@/components/collections/CollectionProductGrid";

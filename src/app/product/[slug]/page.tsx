@@ -4,7 +4,7 @@ import ProductGallery from "@/components/products/ProductGallery";
 import ProductPurchaseInfo from "@/components/products/ProductPurchaseInfo";
 import Breadcrumb from "@/components/products/Breadcrumb";
 import SimilarProducts from "@/components/products/SimilarProducts";
-import AppHeader from "@/components/AppHeader";
+import AppHeader from "@/components/common/AppHeader";
 import AppFooter from "@/components/common/AppFooter";
 import ProductInformation from "@/components/products/ProductInformation";
 import ProductRecentlyViewed from "@/components/products/ProductRecentlyViewed";

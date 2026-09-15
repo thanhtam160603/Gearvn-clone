@@ -6,21 +6,21 @@ import Link from "next/link";
 import {
   Bars3Icon,
   ShoppingCartIcon,
-  UserCircleIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
 import { homepageCategories, quickLinks } from "@/data/homepage-data";
-import MobileCategoryDrawer from "./MobileCategoryDrawer";
+import MobileCategoryDrawer from "@/components/home/MobileCategoryDrawer";
 import SearchBox from "./SearchBox";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 import { openDrawer } from "@/store/cart-slice";
 import { selectCartTotalQuantity } from "@/store/cart-selectors";
-import DesktopCategoryOverlay from "./DesktopCategoryOverlay";
+import DesktopCategoryOverlay from "@/components/home/DesktopCategoryOverlay";
 import { selectIsCategoryOverlayOpen } from "@/store/ui-selectors";
 import {
   closeCategoryOverlay,
   toggleCategoryOverlay,
 } from "@/store/ui-slice";
+import AuthStatusButton from "@/components/auth/AuthStatusButton";
 
 
 export default function AppHeader() {
@@ -110,14 +110,7 @@ export default function AppHeader() {
                 <span className="absolute right-0.5 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-[var(--gearvn-red)]">{totalQuantity}</span>
               </button>
 
-              <button
-                type="button"
-                aria-label="Tài khoản"
-                className="flex h-10 items-center gap-1.5 rounded-md px-2 bg-black transition hover:pointer-events active:scale-[0.98] cursor-pointer"
-              >
-                <UserCircleIcon className="h-7 w-7" />
-                <span className="hidden text-xs font-semibold leading-4 lg:block">Đăng nhập</span>
-              </button>
+              <AuthStatusButton />
 
             </div>
           </div>

@@ -1,4 +1,4 @@
-import AppHeader from "@/components/AppHeader";
+import AppHeader from "@/components/common/AppHeader";
 import AppFooter from "@/components/common/AppFooter";
 import CartPageContent from "@/components/cart/CartPageContent";
 

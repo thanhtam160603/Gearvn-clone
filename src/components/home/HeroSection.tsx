@@ -8,10 +8,10 @@ import {
   heroBottomBanners,
   promoBanners1,
 } from "@/data/homepage-data";
-import CategoryMenu from "./home/CategoryMenu";
-import HeroCarousel from "./home/HeroCarousel";
-import HeroRightBanner from "./home/HeroRightBanner";
-import HeroBottomBanner from "./home/HeroBottomBanner";
+import CategoryMenu from "./CategoryMenu";
+import HeroCarousel from "./HeroCarousel";
+import HeroRightBanner from "./HeroRightBanner";
+import HeroBottomBanner from "./HeroBottomBanner";
 import { useAppSelector } from "@/hooks/redux-hooks";
 import { selectIsCategoryOverlayOpen } from "@/store/ui-selectors";
 

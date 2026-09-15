@@ -1,4 +1,4 @@
-import type { Category } from "../types/store";
+import type { Category } from "@/types/store";
 
 type CategoryNavProps = {
   categories: Category[];

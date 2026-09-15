@@ -1,6 +1,6 @@
 import AppFooter from "@/components/common/AppFooter";
-import AppHeader from "@/components/AppHeader";
-import HeroSection from "@/components/HeroSection";
+import AppHeader from "@/components/common/AppHeader";
+import HeroSection from "@/components/home/HeroSection";
 import HomepageProductSections from "@/components/products/HomepageProductSections";
 import PromoStrip from "@/components/home/PromoStrip";
 
