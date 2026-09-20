@@ -2,95 +2,100 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use
 > `superpowers:subagent-driven-development` (recommended) or
-> `superpowers:executing-plans` to implement this plan. Thực hiện lần lượt từng
-> task và dùng checkbox (`- [ ]`) để theo dõi tiến độ.
+> `superpowers:executing-plans` to implement this plan task-by-task. Steps use
+> checkbox (`- [ ]`) syntax for tracking.
 
-**Mục tiêu:** Thay module đăng nhập mock phía trình duyệt bằng xác thực
-email/mật khẩu thật sử dụng Auth.js, PostgreSQL và Prisma, đồng thời giữ nguyên
-login dialog, account UI, cart và collection hiện tại.
+**Goal:** Thay module đăng nhập mock phía trình duyệt bằng Auth.js Credentials,
+PostgreSQL và Prisma, đồng thời giữ nguyên login dialog và giao diện account.
 
-**Kiến trúc:** PostgreSQL 17 chạy cục bộ trong Docker. Prisma 7 truy cập bảng
-`User`; Auth.js Credentials kiểm tra password hash và quản lý JWT session
-cookie. Server dùng `auth()` để bảo vệ dữ liệu, client dùng `useSession()` cho
-header/dialog; Redux chỉ còn quản lý cart và UI.
+**Architecture:** PostgreSQL 17 chạy trong Docker. Prisma 7 truy cập bảng
+`User`; Auth.js xác thực email/password và lưu JWT session trong cookie. Server
+dùng `auth()` để bảo vệ dữ liệu; client dùng `useSession()`; Redux chỉ còn quản
+lý cart và UI.
 
-**Tech Stack:** Next.js 16.3, React 19.2, TypeScript 5, Auth.js/NextAuth v5,
-Prisma ORM 7.10, PostgreSQL 17, Docker Compose, bcryptjs, Zod, Redux Toolkit,
-Vitest và Yarn 4 trên Windows.
+**Tech Stack:** Next.js 16.3, React 19.2, TypeScript, Auth.js v5, Prisma 7.10,
+PostgreSQL 17, Docker Compose, bcryptjs, Zod và Redux Toolkit.
 
 **Spec:**
 `docs/superpowers/specs/2026-09-16-authjs-postgresql-prisma-design.md`
 
+## Quyết định về kiểm thử
+
+Theo lựa chọn của chủ dự án, kế hoạch này **không dùng Vitest và không tạo unit
+test**. Mỗi task được kiểm tra bằng typecheck, lint, build, truy vấn PostgreSQL
+và thao tác thủ công trên trình duyệt. Điều này làm kế hoạch dễ học hơn nhưng
+giảm khả năng phát hiện regression tự động.
+
 ## Ràng buộc toàn cục
 
-- Chưa làm đăng ký, quên mật khẩu, xác minh email, OAuth hoặc 2FA.
-- Dùng Credentials Provider và `session.strategy = "jwt"`.
-- Không cài `@auth/prisma-adapter` trong giai đoạn này.
-- Password chỉ được lưu dưới dạng bcrypt hash; không log password/hash.
-- Không lưu auth token trong Redux, `localStorage` hoặc `sessionStorage`.
-- Client Component không được import Prisma hoặc module `src/server/**`.
-- Mọi database mutation riêng tư phải gọi `auth()` và lấy user id từ session.
-- `proxy.ts` chỉ bảo vệ navigation; không thay authorization cạnh database.
-- Giữ nguyên cart persistence, collection và category overlay.
-- PostgreSQL local chạy bằng Docker; không cài PostgreSQL native trên Windows.
-- Dùng `yarn.cmd` nếu PowerShell chặn `yarn.ps1`.
-- Không stage thay đổi hiện có trong `src/components/cart/CartItemRow.tsx`.
-- Mỗi task phải hoàn tất kiểm tra và review trước khi chuyển task tiếp theo.
+- Không làm đăng ký, quên mật khẩu, OAuth, email verification hoặc 2FA.
+- Dùng Auth.js Credentials và `session.strategy = "jwt"`.
+- Không dùng `@auth/prisma-adapter` trong giai đoạn này.
+- Không lưu password plaintext hoặc auth token trong browser storage/Redux.
+- Client Component không import Prisma hoặc module server-only.
+- Mutation riêng tư phải lấy user id từ `auth()`, không lấy từ form/query.
+- `proxy.ts` hỗ trợ UX nhưng không thay thế authorization cạnh database.
+- Không làm thay đổi hành vi cart, collection và category overlay.
+- Không stage thay đổi riêng đang có trong `src/components/cart/CartItemRow.tsx`.
+- Trên Windows dùng `yarn.cmd` nếu PowerShell chặn `yarn.ps1`.
 
-## Sơ đồ file
+## Điểm tiếp tục của source hiện tại
 
-**Tạo mới:**
+- Task 1 đã được kiểm tra: PostgreSQL container đang healthy.
+- Phần chính của Task 2 đã có; cần gỡ Vitest và xóa `vitest.config.ts`.
+- Migration và generated Prisma Client của Task 3 đã xuất hiện; vẫn phải chạy
+  seed và hai truy vấn xác nhận dữ liệu.
+- `src/server/db/prisma.ts` đã có.
+- `sign-in-schema.ts` hiện chứa nhầm code Vitest; thay bằng implementation ở
+  Task 4.
+- Xóa file rỗng `profile-in-schema.ts` và tạo `profile-schema.ts` đúng tên.
+
+Với trạng thái này, thực hiện Task 2 Step 3, hoàn thành phần kiểm tra còn lại
+của Task 3, rồi làm Task 4. Nếu typecheck ở Task 2 chưa chạy được vì helper
+đang dở, hoàn thành Task 4 trước rồi chạy lại typecheck.
+
+## Cấu trúc file cuối cùng
 
 ```text
 compose.yaml
 .env.example
 prisma.config.ts
-prisma/schema.prisma
-prisma/seed.ts
-prisma/migrations/**
-src/generated/prisma/**
-src/auth.ts
-src/proxy.ts
-src/app/api/auth/[...nextauth]/route.ts
-src/components/auth/AuthSessionProvider.tsx
-src/server/db/prisma.ts
-src/server/auth/password.ts
-src/server/auth/sign-in-schema.ts
-src/server/auth/authorize-credentials.ts
-src/server/auth/profile-schema.ts
-src/server/auth/update-profile-core.ts
-src/server/auth/update-profile.ts
-src/server/auth/require-user.ts
-src/types/next-auth.d.ts
-src/server/auth/__tests__/*.test.ts
-vitest.config.ts
+prisma/
+  schema.prisma
+  seed.ts
+  migrations/
+src/
+  auth.ts
+  proxy.ts
+  generated/prisma/
+  app/api/auth/[...nextauth]/route.ts
+  components/auth/AuthSessionProvider.tsx
+  server/
+    db/prisma.ts
+    auth/
+      sign-in-schema.ts
+      password.ts
+      profile-schema.ts
+      authorize-credentials.ts
+      require-user.ts
+      update-profile-core.ts
+      update-profile.ts
+  types/next-auth.d.ts
 ```
 
-**Sửa:** `package.json`, `yarn.lock`, `.gitignore`, root layout, account layout,
-account pages, các auth component, account component và Redux store.
-
-**Xóa ở task cuối:** auth mock data/service/storage/token/constants, Redux auth
-slice/selectors, `AuthBootstrap`, `AuthGate` và type auth mock.
+Không tạo `vitest.config.ts` hoặc `src/**/__tests__`.
 
 ---
 
-### Task 1: Khởi động PostgreSQL local bằng Docker Compose
+### Task 1: PostgreSQL local bằng Docker Compose
 
 **Files:**
 
 - Create: `compose.yaml`
 - Create: `.env.example`
-- Modify: `.gitignore:35-37`
+- Modify: `.gitignore`
 
-**Interfaces:**
-
-- Consumes: Docker Desktop và Docker Compose đang chạy.
-- Produces: PostgreSQL ở `localhost:5432`, database/user `gearvn`, cùng biến
-  `DATABASE_URL` cho Prisma.
-
-- [ ] **Step 1: Cho phép commit `.env.example` nhưng tiếp tục ignore secret**
-
-Sửa phần env trong `.gitignore`:
+- [ ] **Step 1: Giữ một block env duy nhất trong `.gitignore`**
 
 ```gitignore
 # env files
@@ -98,9 +103,7 @@ Sửa phần env trong `.gitignore`:
 !.env.example
 ```
 
-- [ ] **Step 2: Tạo PostgreSQL service**
-
-Tạo `compose.yaml`:
+- [ ] **Step 2: Cấu hình PostgreSQL**
 
 ```yaml
 services:
@@ -126,88 +129,69 @@ volumes:
   gearvn_postgres_data:
 ```
 
-- [ ] **Step 3: Tạo env mẫu và env local**
+- [ ] **Step 3: Cấu hình environment**
 
-Tạo `.env.example`:
+`.env.example`:
 
 ```dotenv
 DATABASE_URL="postgresql://gearvn:gearvn_local_password@localhost:5432/gearvn?schema=public"
 AUTH_SECRET="replace-with-a-random-secret"
 ```
 
-Run:
+Tạo `.env.local` và không commit file này:
 
 ```powershell
 Copy-Item -LiteralPath .env.example -Destination .env.local
 ```
 
-Không commit `.env.local`.
-
-- [ ] **Step 4: Validate và chạy container**
+- [ ] **Step 4: Kiểm tra PostgreSQL**
 
 ```powershell
 docker compose config
 docker compose up -d
 docker compose ps
-```
-
-Expected: service `postgres` có trạng thái `Up ... (healthy)`.
-
-- [ ] **Step 5: Kiểm tra database**
-
-```powershell
 docker compose exec postgres psql -U gearvn -d gearvn -c "SELECT current_database(), current_user;"
 ```
 
-Expected: database và user đều là `gearvn`.
-
-- [ ] **Step 6: Commit**
-
-```powershell
-git add .gitignore .env.example compose.yaml
-git commit -m "chore: add local PostgreSQL container"
-```
+Kết quả: container `healthy`, database và user đều là `gearvn`.
 
 ---
 
-### Task 2: Cài dependencies và cấu hình Prisma 7, Vitest
+### Task 2: Dependencies và Prisma config, không dùng Vitest
 
 **Files:**
 
 - Modify: `package.json`
 - Modify: `yarn.lock`
 - Create: `prisma.config.ts`
-- Create: `vitest.config.ts`
+- Delete if present: `vitest.config.ts`
 
-**Interfaces:**
-
-- Consumes: `.env.local` từ Task 1.
-- Produces: Prisma/Auth.js libraries và lệnh `yarn.cmd test`.
-
-- [ ] **Step 1: Cài runtime dependencies**
+- [ ] **Step 1: Cài dependencies runtime**
 
 ```powershell
 yarn.cmd add next-auth@beta @prisma/client@7.10.0 @prisma/adapter-pg@7.10.0 pg bcryptjs zod server-only
 ```
 
-- [ ] **Step 2: Cài development dependencies**
+- [ ] **Step 2: Cài dependencies development cần thiết**
 
 ```powershell
-yarn.cmd add --dev prisma@7.10.0 tsx @types/pg vitest dotenv
+yarn.cmd add --dev prisma@7.10.0 tsx @types/pg dotenv
 ```
 
-- [ ] **Step 3: Thêm test scripts vào `package.json`**
+- [ ] **Step 3: Gỡ Vitest nếu đã cài**
 
-Giữ các script cũ và thêm:
+```powershell
+yarn.cmd remove vitest
+```
+
+Xóa `vitest.config.ts` và hai scripts sau khỏi `package.json`:
 
 ```json
 "test": "vitest run",
 "test:watch": "vitest"
 ```
 
-- [ ] **Step 4: Tạo Prisma config đọc `.env.local`**
-
-Tạo `prisma.config.ts`:
+- [ ] **Step 4: Tạo `prisma.config.ts`**
 
 ```ts
 import { config } from "dotenv";
@@ -227,60 +211,27 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 5: Tạo Vitest config hỗ trợ alias**
-
-Tạo `vitest.config.ts`:
-
-```ts
-import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
-
-export default defineConfig({
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
-  },
-  test: {
-    environment: "node",
-    include: ["src/**/*.test.ts"],
-  },
-});
-```
-
-- [ ] **Step 6: Kiểm tra toolchain**
+- [ ] **Step 5: Kiểm tra toolchain**
 
 ```powershell
 yarn.cmd prisma --version
-yarn.cmd vitest --version
+yarn.cmd tsc --noEmit --incremental false
 ```
 
-Expected: Prisma CLI/Client ở nhánh `7.10.x`; Vitest chạy được.
-
-- [ ] **Step 7: Commit**
-
-```powershell
-git add package.json yarn.lock prisma.config.ts vitest.config.ts
-git commit -m "chore: configure Prisma and auth dependencies"
-```
+Kết quả: Prisma CLI và Client là `7.10.x`.
 
 ---
 
-### Task 3: Tạo User schema, migration và seed
+### Task 3: User schema, migration, generate và seed
 
 **Files:**
 
 - Create: `prisma/schema.prisma`
 - Create: `prisma/seed.ts`
 - Create: `prisma/migrations/**`
-- Create: `src/generated/prisma/**`
+- Generate: `src/generated/prisma/**`
 
-**Interfaces:**
-
-- Produces: model `User`, enum `UserRole`, generated Prisma Client và tài khoản
-  `demo@gearvn.local`.
-
-- [ ] **Step 1: Tạo Prisma schema**
+- [ ] **Step 1: Khai báo schema**
 
 ```prisma
 generator client {
@@ -312,24 +263,24 @@ model User {
 }
 ```
 
-- [ ] **Step 2: Validate và migrate**
+- [ ] **Step 2: Validate, migrate và generate**
 
 ```powershell
 yarn.cmd prisma validate
 yarn.cmd prisma migrate dev --name init_auth_user
+yarn.cmd prisma generate
 ```
 
-Expected: schema valid, migration applied và client được generate.
+Prisma 7 cần chạy `generate` rõ ràng. Sau lệnh này phải có
+`src/generated/prisma/client.ts`.
 
-- [ ] **Step 3: Tạo seed idempotent**
-
-Tạo `prisma/seed.ts`:
+- [ ] **Step 3: Tạo development seed**
 
 ```ts
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 
-import { PrismaClient } from "../src/generated/prisma/client.ts";
+import { PrismaClient } from "../src/generated/prisma/client";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL is required.");
@@ -365,51 +316,35 @@ main()
   });
 ```
 
-- [ ] **Step 4: Chạy seed hai lần và kiểm tra chỉ có một user**
+- [ ] **Step 4: Seed và kiểm tra database**
 
 ```powershell
 yarn.cmd prisma db seed
 yarn.cmd prisma db seed
 docker compose exec postgres psql -U gearvn -d gearvn -c 'SELECT email, COUNT(*) OVER () AS total FROM "User";'
-```
-
-Expected: đúng một row và `total = 1`.
-
-- [ ] **Step 5: Xác nhận password không phải plaintext**
-
-```powershell
 docker compose exec postgres psql -U gearvn -d gearvn -c 'SELECT "passwordHash" LIKE ''$2%'' AS is_bcrypt, "passwordHash" = ''Demo@123'' AS is_plaintext FROM "User";'
 ```
 
-Expected: `is_bcrypt = t`, `is_plaintext = f`.
-
-- [ ] **Step 6: Commit**
-
-```powershell
-git add prisma src/generated/prisma
-git commit -m "feat: add PostgreSQL user schema and seed"
-```
+Kết quả: một user, `is_bcrypt = true`, `is_plaintext = false`.
 
 ---
 
-### Task 4: Tạo Prisma Client server-only
+### Task 4: Prisma Client và các validation helper
 
 **Files:**
 
 - Create: `src/server/db/prisma.ts`
+- Create: `src/server/auth/sign-in-schema.ts`
+- Create: `src/server/auth/password.ts`
+- Create: `src/server/auth/profile-schema.ts`
+- Delete/rename: `src/server/auth/profile-in-schema.ts`
 
-**Interfaces:**
-
-- Consumes: generated `PrismaClient` và `DATABASE_URL`.
-- Produces: `prisma: PrismaClient` dùng chung cho Auth.js và Server Action.
-
-- [ ] **Step 1: Tạo client có global cache**
+- [ ] **Step 1: Tạo Prisma singleton server-only**
 
 ```ts
 import "server-only";
 
 import { PrismaPg } from "@prisma/adapter-pg";
-
 import { PrismaClient } from "@/generated/prisma/client";
 
 const connectionString = process.env.DATABASE_URL;
@@ -421,82 +356,17 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma =
   globalForPrisma.prisma ??
-  new PrismaClient({
-    adapter: new PrismaPg({ connectionString }),
-  });
+  new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 ```
 
-- [ ] **Step 2: Typecheck**
+- [ ] **Step 2: Viết sign-in schema**
 
-```powershell
-yarn.cmd tsc --noEmit
-```
-
-Expected: không có lỗi import generated client hoặc adapter.
-
-- [ ] **Step 3: Commit**
-
-```powershell
-git add src/server/db/prisma.ts
-git commit -m "feat: add server-only Prisma client"
-```
-
----
-
-### Task 5: Viết validation và password helpers theo TDD
-
-**Files:**
-
-- Create: `src/server/auth/sign-in-schema.ts`
-- Create: `src/server/auth/password.ts`
-- Create: `src/server/auth/profile-schema.ts`
-- Test: `src/server/auth/__tests__/sign-in-schema.test.ts`
-- Test: `src/server/auth/__tests__/password.test.ts`
-- Test: `src/server/auth/__tests__/profile-schema.test.ts`
-
-**Interfaces:**
-
-- Produces `signInSchema`, `profileSchema`, `UpdateProfileInput`,
-  `hashPassword()` và `verifyPassword()`.
-
-- [ ] **Step 1: Viết test fail cho sign-in schema**
-
-```ts
-import { describe, expect, it } from "vitest";
-
-import { signInSchema } from "@/server/auth/sign-in-schema";
-
-describe("signInSchema", () => {
-  it("chuẩn hóa email và chấp nhận password hợp lệ", () => {
-    expect(
-      signInSchema.parse({
-        email: "  DEMO@GEARVN.LOCAL ",
-        password: "Demo@123",
-      }),
-    ).toEqual({ email: "demo@gearvn.local", password: "Demo@123" });
-  });
-
-  it("từ chối email sai và password dưới 8 ký tự", () => {
-    expect(
-      signInSchema.safeParse({ email: "invalid", password: "short" }).success,
-    ).toBe(false);
-  });
-});
-```
-
-Run:
-
-```powershell
-yarn.cmd test src/server/auth/__tests__/sign-in-schema.test.ts
-```
-
-Expected: FAIL vì chưa có implementation.
-
-- [ ] **Step 2: Implement sign-in schema**
+`src/server/auth/sign-in-schema.ts` chỉ chứa implementation, không chứa
+`describe`, `it`, `expect` hoặc import từ Vitest:
 
 ```ts
 import { z } from "zod";
@@ -510,33 +380,7 @@ export const signInSchema = z.object({
 });
 ```
 
-- [ ] **Step 3: Viết test fail cho password helpers**
-
-```ts
-import { describe, expect, it } from "vitest";
-
-import { hashPassword, verifyPassword } from "@/server/auth/password";
-
-describe("password helpers", () => {
-  it("hash password và chỉ xác nhận password đúng", async () => {
-    const hash = await hashPassword("Demo@123");
-
-    expect(hash).not.toBe("Demo@123");
-    await expect(verifyPassword("Demo@123", hash)).resolves.toBe(true);
-    await expect(verifyPassword("Wrong@123", hash)).resolves.toBe(false);
-  });
-});
-```
-
-Run:
-
-```powershell
-yarn.cmd test src/server/auth/__tests__/password.test.ts
-```
-
-Expected: FAIL vì chưa có implementation.
-
-- [ ] **Step 4: Implement password helpers**
+- [ ] **Step 3: Viết password helper**
 
 ```ts
 import bcrypt from "bcryptjs";
@@ -555,45 +399,9 @@ export function verifyPassword(
 }
 ```
 
-Không đặt `import "server-only"` trong helper thuần này vì Vitest cần import
-trực tiếp. Ranh giới server được áp dụng tại `src/auth.ts`, Prisma module và
-Server Action; Client Component không được import helper này.
+- [ ] **Step 4: Đổi tên và viết profile schema**
 
-- [ ] **Step 5: Viết test fail cho profile schema**
-
-```ts
-import { describe, expect, it } from "vitest";
-
-import { profileSchema } from "@/server/auth/profile-schema";
-
-describe("profileSchema", () => {
-  it("chuẩn hóa profile hợp lệ", () => {
-    expect(
-      profileSchema.parse({
-        displayName: "  Nguyễn Văn A  ",
-        phone: "0912345678",
-        birthDate: "2000-01-01",
-      }),
-    ).toEqual({
-      displayName: "Nguyễn Văn A",
-      phone: "0912345678",
-      birthDate: "2000-01-01",
-    });
-  });
-
-  it("từ chối phone sai và ngày tương lai", () => {
-    expect(
-      profileSchema.safeParse({
-        displayName: "Demo",
-        phone: "123",
-        birthDate: "2999-01-01",
-      }).success,
-    ).toBe(false);
-  });
-});
-```
-
-- [ ] **Step 6: Implement profile schema**
+Xóa file rỗng `profile-in-schema.ts`; tạo đúng tên `profile-schema.ts`:
 
 ```ts
 import { z } from "zod";
@@ -610,7 +418,7 @@ export const profileSchema = z.object({
     if (value === "") return true;
     if (!datePattern.test(value)) return false;
 
-    const date = new Date(`${value}T00:00:00Z`);
+    const date = new Date(`${value}T00:00:00.000Z`);
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
@@ -625,103 +433,29 @@ export const profileSchema = z.object({
 export type UpdateProfileInput = z.infer<typeof profileSchema>;
 ```
 
-- [ ] **Step 7: Chạy toàn bộ helper tests**
+- [ ] **Step 5: Kiểm tra helper không cần test framework**
 
 ```powershell
-yarn.cmd test src/server/auth/__tests__
+yarn.cmd tsx -e "import { signInSchema } from './src/server/auth/sign-in-schema.ts'; console.log(signInSchema.parse({ email: ' DEMO@GEARVN.LOCAL ', password: 'Demo@123' }))"
+yarn.cmd tsx -e "import { hashPassword, verifyPassword } from './src/server/auth/password.ts'; (async () => { const hash = await hashPassword('Demo@123'); console.log(await verifyPassword('Demo@123', hash), await verifyPassword('Wrong@123', hash)); })()"
+yarn.cmd tsc --noEmit --incremental false
 ```
 
-Expected: ba test file PASS.
-
-- [ ] **Step 8: Commit**
-
-```powershell
-git add src/server/auth
-git commit -m "test: add auth validation and password helpers"
-```
+Kết quả: email được chuẩn hóa; password đúng trả `true`, sai trả `false`;
+typecheck exit `0`.
 
 ---
 
-### Task 6: Viết credential authorization có thể kiểm thử
+### Task 5: Credential authorization và Auth.js config
 
 **Files:**
 
 - Create: `src/server/auth/authorize-credentials.ts`
-- Test: `src/server/auth/__tests__/authorize-credentials.test.ts`
+- Create: `src/types/next-auth.d.ts`
+- Create: `src/auth.ts`
+- Create: `src/app/api/auth/[...nextauth]/route.ts`
 
-**Interfaces:**
-
-- Consumes: `signInSchema` và dependencies được truyền từ `src/auth.ts`.
-- Produces:
-
-```ts
-authorizeCredentials(raw: unknown): Promise<AuthorizedUser | null>
-```
-
-- [ ] **Step 1: Viết failing test**
-
-```ts
-import { describe, expect, it, vi } from "vitest";
-
-import { authorizeCredentials } from "@/server/auth/authorize-credentials";
-
-const storedUser = {
-  id: "user-1",
-  email: "demo@gearvn.local",
-  passwordHash: "$2b$12$hash",
-  displayName: "Demo Customer",
-  role: "CUSTOMER" as const,
-};
-
-describe("authorizeCredentials", () => {
-  it("trả safe user khi credentials hợp lệ", async () => {
-    const findUserByEmail = vi.fn().mockResolvedValue(storedUser);
-    const verify = vi.fn().mockResolvedValue(true);
-
-    const result = await authorizeCredentials(
-      { email: "DEMO@GEARVN.LOCAL", password: "Demo@123" },
-      { findUserByEmail, verifyPassword: verify },
-    );
-
-    expect(findUserByEmail).toHaveBeenCalledWith("demo@gearvn.local");
-    expect(result).toEqual({
-      id: "user-1",
-      email: "demo@gearvn.local",
-      name: "Demo Customer",
-      displayName: "Demo Customer",
-      role: "CUSTOMER",
-    });
-    expect(result).not.toHaveProperty("passwordHash");
-  });
-
-  it("trả null cho user không tồn tại hoặc password sai", async () => {
-    await expect(
-      authorizeCredentials(
-        { email: "none@gearvn.local", password: "Demo@123" },
-        {
-          findUserByEmail: vi.fn().mockResolvedValue(null),
-          verifyPassword: vi.fn(),
-        },
-      ),
-    ).resolves.toBeNull();
-
-    await expect(
-      authorizeCredentials(
-        { email: "demo@gearvn.local", password: "Wrong@123" },
-        {
-          findUserByEmail: vi.fn().mockResolvedValue(storedUser),
-          verifyPassword: vi.fn().mockResolvedValue(false),
-        },
-      ),
-    ).resolves.toBeNull();
-  });
-});
-```
-
-Run `yarn.cmd test src/server/auth/__tests__/authorize-credentials.test.ts`.
-Expected: FAIL vì module chưa tồn tại.
-
-- [ ] **Step 2: Implement authorization với dependency injection**
+- [ ] **Step 1: Tạo credential authorization thuần**
 
 ```ts
 import { signInSchema } from "@/server/auth/sign-in-schema";
@@ -734,30 +468,19 @@ type StoredCredentialUser = {
   role: "CUSTOMER";
 };
 
-export type AuthorizedUser = {
-  id: string;
-  email: string;
-  name: string;
-  displayName: string;
-  role: "CUSTOMER";
-};
-
-export type AuthorizeCredentialsDependencies = {
+type Dependencies = {
   findUserByEmail(email: string): Promise<StoredCredentialUser | null>;
   verifyPassword(password: string, hash: string): Promise<boolean>;
 };
 
-export async function authorizeCredentials(
-  raw: unknown,
-  dependencies: AuthorizeCredentialsDependencies,
-): Promise<AuthorizedUser | null> {
+export async function authorizeCredentials(raw: unknown, deps: Dependencies) {
   const parsed = signInSchema.safeParse(raw);
   if (!parsed.success) return null;
 
-  const user = await dependencies.findUserByEmail(parsed.data.email);
+  const user = await deps.findUserByEmail(parsed.data.email);
   if (!user) return null;
 
-  const valid = await dependencies.verifyPassword(
+  const valid = await deps.verifyPassword(
     parsed.data.password,
     user.passwordHash,
   );
@@ -773,40 +496,7 @@ export async function authorizeCredentials(
 }
 ```
 
-- [ ] **Step 3: Verify**
-
-```powershell
-yarn.cmd test src/server/auth/__tests__/authorize-credentials.test.ts
-yarn.cmd tsc --noEmit
-```
-
-Expected: test PASS và typecheck exit `0`.
-
-- [ ] **Step 4: Commit**
-
-```powershell
-git add src/server/auth/authorize-credentials.ts src/server/auth/__tests__/authorize-credentials.test.ts
-git commit -m "feat: authorize credentials from PostgreSQL"
-```
-
----
-
-### Task 7: Cấu hình Auth.js Credentials, JWT session và Route Handler
-
-**Files:**
-
-- Create: `src/types/next-auth.d.ts`
-- Create: `src/auth.ts`
-- Create: `src/app/api/auth/[...nextauth]/route.ts`
-- Modify locally, do not commit: `.env.local`
-
-**Interfaces:**
-
-- `src/auth.ts` export `handlers`, `auth`, `signIn`, `signOut`.
-- Session công khai `id`, `email`, `displayName`, `role`; tuyệt đối không có
-  `passwordHash`.
-
-- [ ] **Step 1: Mở rộng type của Auth.js**
+- [ ] **Step 2: Mở rộng Auth.js types**
 
 ```ts
 import type { DefaultSession } from "next-auth";
@@ -836,7 +526,7 @@ declare module "next-auth/jwt" {
 }
 ```
 
-- [ ] **Step 2: Tạo Auth.js config và nối dependencies thật**
+- [ ] **Step 3: Tạo `src/auth.ts`**
 
 ```ts
 import NextAuth from "next-auth";
@@ -886,7 +576,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { id: token.id },
           select: { email: true, displayName: true, role: true },
         });
-
         if (freshUser) {
           token.email = freshUser.email;
           token.name = freshUser.displayName;
@@ -894,7 +583,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.role = freshUser.role;
         }
       }
-
       return token;
     },
     session({ session, token }) {
@@ -909,10 +597,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 });
 ```
 
-Nếu `token.id` rỗng thì code account phía server vẫn phải từ chối; fallback
-trong callback chỉ giúp type an toàn, không được coi là authorization.
-
-- [ ] **Step 3: Tạo Route Handler**
+- [ ] **Step 4: Tạo Route Handler**
 
 ```ts
 import { handlers } from "@/auth";
@@ -920,35 +605,24 @@ import { handlers } from "@/auth";
 export const { GET, POST } = handlers;
 ```
 
-- [ ] **Step 4: Tạo secret local**
+- [ ] **Step 5: Tạo secret thật trong `.env.local`**
 
 ```powershell
-npx.cmd auth secret
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
-Kiểm tra `.env.local` có `AUTH_SECRET` và file vẫn bị Git ignore. Không in hoặc
-commit giá trị secret.
+Copy kết quả vào `AUTH_SECRET` trong `.env.local`; không commit secret.
 
-- [ ] **Step 5: Verify**
+- [ ] **Step 6: Kiểm tra**
 
 ```powershell
-yarn.cmd tsc --noEmit
+yarn.cmd tsc --noEmit --incremental false
 yarn.cmd build
-git status --short
-```
-
-Expected: typecheck/build exit `0`; `.env.local` không xuất hiện trong status.
-
-- [ ] **Step 6: Commit**
-
-```powershell
-git add src/auth.ts src/types/next-auth.d.ts "src/app/api/auth/[...nextauth]/route.ts"
-git commit -m "feat: configure Auth.js credentials session"
 ```
 
 ---
 
-### Task 8: Cấp session cho client và chuyển LoginForm sang Auth.js
+### Task 6: SessionProvider và login dialog
 
 **Files:**
 
@@ -957,7 +631,7 @@ git commit -m "feat: configure Auth.js credentials session"
 - Modify: `src/components/auth/LoginForm.tsx`
 - Modify: `src/components/auth/GlobalLoginDialog.tsx`
 
-- [ ] **Step 1: Tạo client provider**
+- [ ] **Step 1: Tạo provider**
 
 ```tsx
 "use client";
@@ -970,103 +644,77 @@ export default function AuthSessionProvider({ children }: { children: ReactNode 
 }
 ```
 
-- [ ] **Step 2: Bọc application trong provider**
+- [ ] **Step 2: Mount provider trong root layout**
 
-Trong `src/app/layout.tsx`, đặt `AuthSessionProvider` bên trong `StoreProvider`.
-Tạm giữ `AuthBootstrap` đến Task 12 để migration có thể thực hiện từng bước.
-Nếu `GlobalLoginDialog` dùng `useSearchParams`, bọc riêng component này trong
-`<Suspense fallback={null}>` để production build không lỗi static bailout.
+Đặt `AuthSessionProvider` bên trong `StoreProvider`. Tạm giữ `AuthBootstrap`
+cho đến khi Task 10 hoàn thành. Bọc `GlobalLoginDialog` trong
+`<Suspense fallback={null}>` nếu component sử dụng `useSearchParams()`.
 
-- [ ] **Step 3: Thay Redux login thunk trong LoginForm**
+- [ ] **Step 3: Chuyển LoginForm sang Auth.js**
 
-Giữ nguyên markup, nhưng thay Redux imports/state bằng:
+Xóa imports Redux auth. Giữ local state và submit bằng:
 
 ```tsx
-import { signIn } from "next-auth/react";
-import { useState, type SubmitEvent } from "react";
+const result = await signIn("credentials", {
+  redirect: false,
+  email: email.trim().toLowerCase(),
+  password,
+});
 
-const [isSubmitting, setIsSubmitting] = useState(false);
-const [error, setError] = useState<string | null>(null);
-
-async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-  event.preventDefault();
-  if (isSubmitting) return;
-
-  setIsSubmitting(true);
-  setError(null);
-
-  try {
-    const result = await signIn("credentials", {
-      redirect: false,
-      email: email.trim().toLowerCase(),
-      password,
-    });
-
-    if (result?.error) {
-      setError("Email hoặc mật khẩu không chính xác.");
-      setPassword("");
-      return;
-    }
-
-    onSuccess?.();
-  } catch {
-    setError("Dịch vụ đăng nhập tạm thời không khả dụng.");
-  } finally {
-    setIsSubmitting(false);
-  }
+if (result?.error) {
+  setError("Email hoặc mật khẩu không chính xác.");
+  setPassword("");
+  return;
 }
+
+onSuccess?.();
 ```
 
-Khu vực tài khoản demo phải nằm trong
-`process.env.NODE_ENV === "development"`. Không đưa password vào query string.
+Phải có `try/catch/finally`, local `isSubmitting`, lỗi dịch vụ chung và khu vực
+tài khoản demo chỉ hiển thị khi `process.env.NODE_ENV === "development"`.
 
-- [ ] **Step 4: Hoàn thiện success navigation**
+- [ ] **Step 4: Điều hướng sau login**
 
-Trong `GlobalLoginDialog`, sau khi đóng dialog chỉ nhận destination bắt đầu
-bằng `/account`; nếu không hợp lệ dùng `/`. Sau `router.replace(destination)`
-gọi `router.refresh()` để Server Components nhìn thấy cookie mới.
+Trong `GlobalLoginDialog`, chỉ chấp nhận redirect bắt đầu bằng `/account`;
+fallback `/`. Sau khi đóng dialog:
 
-- [ ] **Step 5: Verify thủ công**
+```tsx
+router.replace(destination);
+router.refresh();
+```
+
+- [ ] **Step 5: Kiểm tra thủ công**
 
 ```powershell
 yarn.cmd dev
 ```
 
-Kiểm tra login sai hiện lỗi chung; login bằng tài khoản seed đóng dialog;
-reload vẫn còn session. Sau đó chạy:
-
-```powershell
-yarn.cmd tsc --noEmit
-yarn.cmd lint
-```
-
-- [ ] **Step 6: Commit**
-
-```powershell
-git add src/app/layout.tsx src/components/auth/AuthSessionProvider.tsx src/components/auth/LoginForm.tsx src/components/auth/GlobalLoginDialog.tsx
-git commit -m "feat: connect login dialog to Auth.js"
-```
+Kiểm tra login sai, login đúng bằng tài khoản seed và reload vẫn còn session.
 
 ---
 
-### Task 9: Chuyển header, account menu và logout sang Auth.js
+### Task 7: Header, account menu và logout
 
 **Files:**
 
 - Modify: `src/components/auth/AuthStatusButton.tsx`
 - Modify: `src/components/account/AccountMenu.tsx`
 
-- [ ] **Step 1: Đổi AccountMenu sang Auth.js user type**
+- [ ] **Step 1: Đọc session bằng Auth.js**
 
-Prop `user` dùng `NonNullable<Session["user"]>` thay cho `AuthUser`; UI tiếp
-tục đọc `displayName` và `email`, không đọc token.
-
-- [ ] **Step 2: Đổi AuthStatusButton sang useSession**
+Trong `AuthStatusButton` dùng:
 
 ```tsx
 const { data: session, status } = useSession();
-const [loggingOut, setLoggingOut] = useState(false);
+```
 
+- `loading`: render skeleton.
+- Không có `session.user`: render nút mở Redux login dialog.
+- Có user: truyền `session.user` vào `AccountMenu`.
+
+- [ ] **Step 2: Đăng xuất**
+
+```tsx
 async function handleLogout() {
   setLoggingOut(true);
   await signOut({ redirect: false });
@@ -1075,39 +723,33 @@ async function handleLogout() {
 }
 ```
 
-Mapping UI:
+`AccountMenu` dùng type `NonNullable<Session["user"]>`, không dùng `AuthUser`
+mock.
 
-- `status === "loading"`: skeleton hiện tại.
-- `!session?.user`: nút mở login dialog qua Redux UI slice.
-- Có `session.user`: render `AccountMenu`.
-
-- [ ] **Step 3: Verify và commit**
+- [ ] **Step 3: Kiểm tra**
 
 ```powershell
-yarn.cmd tsc --noEmit
+yarn.cmd tsc --noEmit --incremental false
 yarn.cmd lint
-git add src/components/auth/AuthStatusButton.tsx src/components/account/AccountMenu.tsx
-git commit -m "feat: use Auth.js session in account header"
 ```
 
-Kiểm tra thủ công: header đổi ngay sau login; logout xóa session, về `/`,
-reload không tự đăng nhập lại.
+Kiểm tra header đổi trạng thái sau login/logout và logout vẫn mất session sau
+reload.
 
 ---
 
-### Task 10: Bảo vệ `/account` bằng proxy và authorization phía server
+### Task 8: Bảo vệ account route
 
 **Files:**
 
 - Create: `src/proxy.ts`
 - Create: `src/server/auth/require-user.ts`
 - Modify: `src/components/auth/GlobalLoginDialog.tsx`
-- Modify: `src/app/layout.tsx`
 - Modify: `src/app/account/layout.tsx`
 - Modify: `src/components/account/AccountShell.tsx`
 - Modify: `src/components/account/AccountSidebar.tsx`
 
-- [ ] **Step 1: Tạo helper authorization phía server**
+- [ ] **Step 1: Tạo server authorization helper**
 
 ```ts
 import "server-only";
@@ -1121,9 +763,6 @@ export async function requireUser() {
   return session.user;
 }
 ```
-
-Các trang con có thể truyền destination cụ thể sau này; mutation không dùng
-redirect helper mà phải trả lỗi authorization rõ ràng.
 
 - [ ] **Step 2: Tạo Next.js 16 proxy**
 
@@ -1146,97 +785,40 @@ export default auth((request) => {
 export const config = { matcher: ["/account/:path*"] };
 ```
 
-- [ ] **Step 3: Tự mở dialog sau redirect**
+- [ ] **Step 3: Tự mở login dialog**
 
-Trong `GlobalLoginDialog`, dùng `useSearchParams()` và `useEffect()` để dispatch
-`openLoginDialog(nextPath)` khi `login=required`. Chỉ chấp nhận `nextPath` là
-`/account` hoặc bắt đầu bằng `/account/`; còn lại dùng `/account`. Root layout
-phải bọc dialog trong `Suspense` như Task 8.
+`GlobalLoginDialog` đọc `login=required` bằng `useSearchParams()` và dispatch
+`openLoginDialog(nextPath)`. Chỉ nhận `/account` hoặc `/account/...`.
 
-- [ ] **Step 4: Đưa session server xuống account shell**
+- [ ] **Step 4: Chuyển account layout sang server guard**
 
-Đổi `src/app/account/layout.tsx` thành `async`, gọi `requireUser()`, bỏ
-`AuthGate`, rồi truyền `user` vào `AccountShell` và `AccountSidebar`. Sidebar
-dùng prop session user, gọi `signOut({ redirect: false })`, về `/` và refresh;
-không còn import auth selectors/slice.
+Đổi layout thành async, gọi `requireUser()`, bỏ `AuthGate`, truyền safe user
+vào `AccountShell` rồi `AccountSidebar`. Sidebar dùng Auth.js `signOut()`.
 
-- [ ] **Step 5: Verify lớp UX và lớp authorization**
+- [ ] **Step 5: Kiểm tra**
+
+Mở cửa sổ ẩn danh tại `/account/profile`: phải về `/`, dialog tự mở; login xong
+quay lại `/account/profile`; logout từ sidebar về `/`.
 
 ```powershell
-yarn.cmd tsc --noEmit
+yarn.cmd tsc --noEmit --incremental false
 yarn.cmd build
-```
-
-Kiểm tra cửa sổ ẩn danh:
-
-1. Mở trực tiếp `/account/profile`.
-2. Bị chuyển về `/` và dialog tự mở.
-3. Login thành công quay lại `/account/profile`.
-4. Logout từ sidebar quay về `/`.
-
-- [ ] **Step 6: Commit**
-
-```powershell
-git add src/proxy.ts src/server/auth/require-user.ts src/app/layout.tsx src/app/account/layout.tsx src/components/auth/GlobalLoginDialog.tsx src/components/account/AccountShell.tsx src/components/account/AccountSidebar.tsx
-git commit -m "feat: protect account routes with Auth.js"
 ```
 
 ---
 
-### Task 11: Đọc và cập nhật profile bằng PostgreSQL
+### Task 9: Lưu profile vào PostgreSQL
 
 **Files:**
 
 - Create: `src/server/auth/update-profile-core.ts`
 - Create: `src/server/auth/update-profile.ts`
-- Test: `src/server/auth/__tests__/update-profile.test.ts`
 - Modify: `src/app/account/page.tsx`
 - Modify: `src/components/account/AccountOverview.tsx`
 - Modify: `src/app/account/profile/page.tsx`
 - Modify: `src/components/account/AccountProfileForm.tsx`
 
-- [ ] **Step 1: Viết failing tests cho authorization của mutation**
-
-Tách core function nhận dependencies để test không cần database:
-
-```ts
-it("không update database khi thiếu user id", async () => {
-  const updateUser = vi.fn();
-  await expect(
-    updateProfileCore(validInput, { getUserId: async () => null, updateUser }),
-  ).rejects.toThrow("UNAUTHORIZED");
-  expect(updateUser).not.toHaveBeenCalled();
-});
-
-it("luôn update id lấy từ session", async () => {
-  const updateUser = vi.fn().mockResolvedValue(savedProfile);
-  await updateProfileCore(validInput, {
-    getUserId: async () => "trusted-user-id",
-    updateUser,
-  });
-  expect(updateUser).toHaveBeenCalledWith("trusted-user-id", expect.anything());
-});
-```
-
-Run test và xác nhận FAIL vì implementation chưa tồn tại.
-
-- [ ] **Step 2: Implement core và Server Action**
-
-`updateProfileCore` phải:
-
-1. Parse bằng `profileSchema`.
-2. Lấy user id qua dependency.
-3. Throw `UNAUTHORIZED` trước mọi update nếu thiếu id.
-4. Chuyển `birthDate` rỗng thành `null`, còn lại thành Date ở UTC.
-5. Chỉ update `displayName`, `phone`, `birthDate`.
-
-Server Action có `"use server"`, truyền `auth()` và `prisma.user.update` vào
-core, sau đó `revalidatePath("/account")` và
-`revalidatePath("/account/profile")`. Không nhận `userId`, `email`, `role` từ
-client.
-
-Implementation thuần của `src/server/auth/update-profile-core.ts` (file mà
-Vitest import, không import `auth()` hoặc Prisma):
+- [ ] **Step 1: Tạo profile core**
 
 ```ts
 import {
@@ -1244,31 +826,23 @@ import {
   type UpdateProfileInput,
 } from "@/server/auth/profile-schema";
 
-type SavedProfile = {
-  email: string;
+type ProfileData = {
   displayName: string;
   phone: string;
   birthDate: Date | null;
 };
 
-type ProfileUpdateData = {
-  displayName: string;
-  phone: string;
-  birthDate: Date | null;
-};
-
-export type UpdateProfileDependencies = {
+type Dependencies<T> = {
   getUserId(): Promise<string | null>;
-  updateUser(userId: string, data: ProfileUpdateData): Promise<SavedProfile>;
+  updateUser(userId: string, data: ProfileData): Promise<T>;
 };
 
-export async function updateProfileCore(
+export async function updateProfileCore<T>(
   raw: UpdateProfileInput,
-  dependencies: UpdateProfileDependencies,
-): Promise<SavedProfile> {
+  dependencies: Dependencies<T>,
+): Promise<T> {
   const input = profileSchema.parse(raw);
   const userId = await dependencies.getUserId();
-
   if (!userId) throw new Error("UNAUTHORIZED");
 
   return dependencies.updateUser(userId, {
@@ -1281,13 +855,12 @@ export async function updateProfileCore(
 }
 ```
 
-Implementation server-only của `src/server/auth/update-profile.ts`:
+- [ ] **Step 2: Tạo Server Action**
 
 ```ts
 "use server";
 
 import { revalidatePath } from "next/cache";
-
 import { auth } from "@/auth";
 import type { UpdateProfileInput } from "@/server/auth/profile-schema";
 import { updateProfileCore } from "@/server/auth/update-profile-core";
@@ -1322,56 +895,37 @@ export async function updateProfileAction(raw: UpdateProfileInput) {
 }
 ```
 
-- [ ] **Step 3: Đọc account data phía server**
+- [ ] **Step 3: Đọc profile phía server**
 
-`src/app/account/page.tsx` và `src/app/account/profile/page.tsx` gọi
-`requireUser()`, sau đó query Prisma theo `user.id`. Profile page chuyển
-`birthDate` thành `YYYY-MM-DD` trước khi truyền Client Component.
+Account overview/profile page gọi `requireUser()`, rồi query Prisma theo
+`user.id`. Chỉ truyền `email`, `displayName`, `phone`, `birthDate` vào client.
 
-`AccountOverview` nhận safe user/profile bằng props, không dùng Redux selector.
+- [ ] **Step 4: Chuyển profile form**
 
-- [ ] **Step 4: Chuyển AccountProfileForm sang Server Action**
+Xóa Redux auth imports. Form nhận profile bằng props, dùng `useTransition()`,
+gọi `updateProfileAction(draft)`, sau đó:
 
-Component nhận prop:
-
-```ts
-type AccountProfileFormProps = {
-  profile: {
-    email: string;
-    displayName: string;
-    phone: string;
-    birthDate: string;
-  };
-};
+```tsx
+await update();
+router.refresh();
+setEditing(false);
 ```
 
-Xóa Redux imports. Dùng `useTransition`; khi submit thành công gọi
-`await updateProfileAction(draft)`, `await update()` từ `useSession()`, đóng
-editing và `router.refresh()`. Hiển thị lỗi công khai, disable nút trong lúc
-pending và vẫn giữ client validation cho UX; server validation mới là lớp đáng
-tin cậy.
+`update` lấy từ `useSession()` để JWT callback đọc lại tên mới từ database.
 
-- [ ] **Step 5: Verify**
+- [ ] **Step 5: Kiểm tra**
+
+Đổi tên, phone, ngày sinh; reload trang; dữ liệu phải còn trong PostgreSQL và
+tên mới phải xuất hiện ở header/sidebar.
 
 ```powershell
-yarn.cmd test src/server/auth/__tests__/update-profile.test.ts
-yarn.cmd tsc --noEmit
+yarn.cmd tsc --noEmit --incremental false
 yarn.cmd lint
-```
-
-Kiểm tra thủ công: đổi tên/phone/ngày sinh; reload vẫn giữ dữ liệu; tên mới
-xuất hiện ở form, sidebar và header sau session update.
-
-- [ ] **Step 6: Commit**
-
-```powershell
-git add src/server/auth/update-profile-core.ts src/server/auth/update-profile.ts src/server/auth/__tests__/update-profile.test.ts src/app/account/page.tsx src/components/account/AccountOverview.tsx src/app/account/profile/page.tsx src/components/account/AccountProfileForm.tsx
-git commit -m "feat: persist account profile in PostgreSQL"
 ```
 
 ---
 
-### Task 12: Xóa auth mock và Redux auth sau khi không còn consumer
+### Task 10: Xóa module auth mock và Redux auth
 
 **Files:**
 
@@ -1386,112 +940,96 @@ git commit -m "feat: persist account profile in PostgreSQL"
 - Delete: `src/store/auth-selectors.ts`
 - Delete: `src/components/auth/AuthBootstrap.tsx`
 - Delete: `src/components/auth/AuthGate.tsx`
-- Modify if unused: `src/types/auth.ts`
+- Delete if unused: `src/types/auth.ts`
 
-- [ ] **Step 1: Audit trước khi xóa**
+- [ ] **Step 1: Audit imports trước khi xóa**
 
 ```powershell
 rg -n "auth-slice|auth-selectors|mock-auth-service|auth-storage|auth-token|AuthBootstrap|AuthGate|AuthUser|accessToken|refreshToken" src
 ```
 
-Mọi kết quả ngoài chính các file sắp xóa phải được migrate trước. Không xóa
-Redux UI slice vì nó vẫn quản lý login dialog.
+- [ ] **Step 2: Gỡ authReducer và AuthBootstrap**
 
-- [ ] **Step 2: Gỡ reducer và bootstrap**
+Xóa `authReducer` khỏi `src/lib/store.ts`; xóa `AuthBootstrap` khỏi root layout.
+Không xóa Redux UI slice vì login dialog vẫn dùng nó.
 
-Xóa `authReducer` khỏi `src/lib/store.ts`; xóa import/render `AuthBootstrap`
-khỏi root layout. Nếu `src/types/auth.ts` không còn type nào được dùng thì xóa
-file, nếu còn type UI độc lập thì chỉ xóa token/mock types.
-
-- [ ] **Step 3: Xóa các file mock và audit lại**
+- [ ] **Step 3: Xóa file mock và audit lại**
 
 ```powershell
 rg -n "auth-slice|auth-selectors|mock-auth-service|auth-storage|auth-token|AuthBootstrap|AuthGate|accessToken|refreshToken" src
 ```
 
-Expected: không có kết quả runtime.
+Kết quả: không còn import runtime nào.
 
-- [ ] **Step 4: Verify và kiểm tra staging**
+- [ ] **Step 4: Kiểm tra**
 
 ```powershell
-yarn.cmd test
-yarn.cmd tsc --noEmit
+yarn.cmd tsc --noEmit --incremental false
 yarn.cmd lint
-git status --short
+yarn.cmd build
 ```
-
-Không stage thay đổi không liên quan hiện có ở
-`src/components/cart/CartItemRow.tsx`.
-
-- [ ] **Step 5: Commit có chọn lọc**
-
-```powershell
-git add src/lib/store.ts src/app/layout.tsx src/types/auth.ts src/data/auth-users.ts src/lib/auth-constants.ts src/lib/auth-storage.ts src/lib/auth-token.ts src/lib/mock-auth-service.ts src/store/auth-slice.ts src/store/auth-selectors.ts src/components/auth/AuthBootstrap.tsx src/components/auth/AuthGate.tsx
-git diff --cached --name-only
-git commit -m "refactor: remove mock browser authentication"
-```
-
-Nếu `src/types/auth.ts` vẫn được giữ thì bỏ đường dẫn đó khỏi `git add`.
 
 ---
 
-### Task 13: Chạy kiểm tra tích hợp và hồi quy cuối cùng
+### Task 11: Kiểm tra tích hợp cuối cùng
 
-**Files:**
+**Files:** Verify only.
 
-- Verify only; không tạo commit rỗng.
-
-- [ ] **Step 1: Kiểm tra database và migration**
+- [ ] **Step 1: Kiểm tra database**
 
 ```powershell
 docker compose ps
 yarn.cmd prisma migrate status
 ```
 
-Expected: `gearvn-postgres` healthy và schema up to date.
-
-- [ ] **Step 2: Chạy toàn bộ automated checks theo thứ tự**
+- [ ] **Step 2: Kiểm tra source**
 
 ```powershell
-yarn.cmd test
-yarn.cmd tsc --noEmit
+yarn.cmd tsc --noEmit --incremental false
 yarn.cmd lint
 yarn.cmd build
 ```
 
-Chỉ báo PASS cho command thật sự exit `0`; timeout không được coi là pass.
-
-- [ ] **Step 3: Chạy smoke test trên browser**
+- [ ] **Step 3: Kiểm tra thủ công trên browser**
 
 ```powershell
 yarn.cmd dev
 ```
 
-Checklist:
+Checklist bắt buộc:
 
 - Login sai không tạo session và chỉ hiện lỗi chung.
-- Login tài khoản seed thành công; reload vẫn còn session.
-- Header/menu/account sidebar hiển thị đúng user.
-- Mọi `/account/*` bị bảo vệ khi chưa login.
-- Profile lưu bền vào PostgreSQL và đồng bộ session.
-- Logout ở header và sidebar đều về `/` và session mất sau reload.
-- Cart persistence và collection filter/sort/pagination vẫn hoạt động.
+- Login đúng bằng tài khoản seed.
+- Reload vẫn giữ session.
+- Header và account sidebar hiển thị đúng user.
+- Chưa login không truy cập được mọi `/account/*`.
+- Profile được lưu vào PostgreSQL và đồng bộ lại session.
+- Logout từ header/sidebar đều về `/` và session mất sau reload.
+- Cart persistence, collection filter/sort/pagination vẫn hoạt động.
 - Tài khoản demo không xuất hiện trong production build.
 
-- [ ] **Step 4: Audit secret và client boundary**
+- [ ] **Step 4: Audit secret và server boundary**
 
 ```powershell
 git status --short --ignored
 rg -n "DATABASE_URL|AUTH_SECRET|passwordHash|Demo@123" src prisma .env.example compose.yaml
-rg -n "@/server/db/prisma|@/auth" src/components --glob "*.tsx"
+rg -n "@/server/db/prisma" src/components --glob "*.tsx"
 ```
 
-Expected: không commit secret; `passwordHash` chỉ ở server/seed/schema; Client
-Component không import Prisma hoặc server-only `auth()`; password demo chỉ tồn
-tại trong seed và development-only helper UI đã được duyệt.
+Không commit `.env.local`, `AUTH_SECRET`, database URL production hoặc password
+plaintext ngoài development seed. Client Component không import Prisma.
 
-- [ ] **Step 5: Ghi kết quả bàn giao**
+## Thứ tự commit gợi ý
 
-Ghi rõ migration đã chạy, tài khoản seed, các command đã pass, test thủ công đã
-làm và giới hạn còn lại: chưa có đăng ký, reset password, OAuth, rate limit hay
-production database. Không tạo commit nếu không có thay đổi source cần thiết.
+```text
+chore: add local PostgreSQL and Prisma setup
+feat: add user schema and development seed
+feat: add Auth.js credentials session
+feat: connect login dialog to Auth.js
+feat: protect account routes
+feat: persist account profile in PostgreSQL
+refactor: remove mock browser authentication
+```
+
+Trước mỗi commit, chạy `git diff --cached --name-only` và bảo đảm không stage
+`src/components/cart/CartItemRow.tsx` nếu thay đổi đó không thuộc module auth.

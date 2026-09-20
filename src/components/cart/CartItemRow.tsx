@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { FiTrash2 } from "react-icons/fi";
 import { CheckIcon } from "@heroicons/react/24/solid";
-
 import type { DetailedCartItem } from "@/types/cart";
 import { useAppDispatch } from "@/hooks/redux-hooks";
 import { removeItem } from "@/store/cart-slice";
