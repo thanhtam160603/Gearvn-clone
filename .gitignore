@@ -22,6 +22,10 @@
 # production
 /build
 
+# Separate backend workspace and local archives
+/backend/dist/
+/.archive/
+
 # misc
 .DS_Store
 *.pem

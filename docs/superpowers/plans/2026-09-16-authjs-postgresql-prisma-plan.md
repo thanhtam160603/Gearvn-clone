@@ -1,5 +1,10 @@
 # Auth.js, PostgreSQL và Prisma Implementation Plan
 
+> **Phương án Next.js full-stack cũ:** plan này không nằm trong lộ trình NestJS
+> microservices đã chọn sau đó. Env riêng của sáu Nest service xem
+> [Plan 00A](2026-09-24-backend-service-env-plan.md); không áp dụng phần
+> .env/Auth.js của plan này cho backend Nest hiện tại.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use
 > `superpowers:subagent-driven-development` (recommended) or
 > `superpowers:executing-plans` to implement this plan task-by-task. Steps use

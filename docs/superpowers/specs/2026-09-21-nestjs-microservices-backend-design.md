@@ -102,13 +102,22 @@ backend/
   tsconfig.json
   tsconfig.build.json
   Dockerfile
-  .env.example
+  apps/<service>/.env.example
 ```
 
 `libs/contracts` chỉ chứa DTO/event contract và type dùng chung, không chứa
 Prisma model hoặc nghiệp vụ. `libs/common` chứa error envelope, request ID,
 logging và health utilities. `libs/auth` chứa logic xác minh access token bằng
 public key, không chứa logic đăng nhập hoặc password.
+
+**Quyết định cấu hình cập nhật:** mỗi app có apps/<service>/.env local và
+.env.example giá trị giả; Compose dùng apps/<service>/.env.compose riêng.
+BackendConfigModule.forService chọn file theo service, BaseEnv chỉ validate
+field chung, field database/JWT/URL được validate ở service sở hữu. Prisma
+config của từng database nạp env của đúng service. Không dùng một PORT hay
+JWT private key trong backend/.env chung cho sáu process. Chi tiết code và
+migration từ source hiện tại ở
+[Plan 00A](../plans/2026-09-24-backend-service-env-plan.md).
 
 ## 5. Trách nhiệm của các service
 
