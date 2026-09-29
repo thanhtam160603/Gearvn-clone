@@ -1,0 +1,157 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  RELEASED
+  EXPIRED
+}
+
+model Brand {
+  id             String    @id @default(cuid())
+  name           String
+  normalizedName String    @unique
+  products       Product[]
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  title    String
+  products Product[]
+}
+
+model Product {
+  id               String                 @id @default(cuid())
+  sku              String                 @unique
+  slug             String                 @unique
+  name             String
+  section          String
+  sortOrder        Int                    @default(0)
+  brandId          String
+  categoryId       String
+  shortDescription String?
+  description      String?
+  originalPrice    Int?
+  salePrice        Int
+  status           String                 @default("in-stock")
+  warranty         String?
+  promotion        String?
+  tags             Json                   @default("[]")
+  highlights       Json                   @default("[]")
+  variants         Json                   @default("[]")
+  bundles          Json                   @default("[]")
+  contentSections  Json                   @default("[]")
+  rating           Float?
+  reviewCount      Int                    @default(0)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  brand            Brand                  @relation(fields: [brandId], references: [id])
+  category         Category               @relation(fields: [categoryId], references: [id])
+  images           ProductImage[]
+  specs            ProductSpec[]
+  attributes       ProductAttribute[]
+  collections      CollectionProduct[]
+  inventory        Inventory?
+  reservationItems StockReservationItem[]
+
+  @@index([salePrice, id])
+  @@index([sortOrder, id])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  position  Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, position])
+}
+
+model ProductSpec {
+  id            String  @id @default(cuid())
+  productId     String
+  groupTitle    String
+  groupPosition Int     @default(0)
+  featured      Boolean @default(false)
+  label         String
+  value         String
+  position      Int
+  product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, featured, groupPosition, position])
+}
+
+model ProductAttribute {
+  id              String  @id @default(cuid())
+  productId       String
+  key             String
+  value           String
+  normalizedValue String
+  product         Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, key, normalizedValue])
+  @@index([key, normalizedValue])
+}
+
+model Collection {
+  id                String              @id @default(cuid())
+  slug              String              @unique
+  title             String
+  breadcrumbLabel   String
+  description       String
+  bannerSrc         String?
+  bannerAlt         String?
+  filterDefinitions Json
+  products          CollectionProduct[]
+}
+
+model CollectionProduct {
+  collectionId String
+  productId    String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, productId])
+  @@index([productId])
+}
+
+model Inventory {
+  productId String  @id
+  available Int
+  reserved  Int     @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model StockReservation {
+  id             String                 @id @default(cuid())
+  idempotencyKey String                 @unique
+  requestHash    String
+  status         ReservationStatus      @default(PENDING)
+  expiresAt      DateTime
+  createdAt      DateTime               @default(now())
+  items          StockReservationItem[]
+
+  @@index([status, expiresAt])
+}
+
+model StockReservationItem {
+  reservationId String
+  productId     String
+  quantity      Int
+  reservation   StockReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  product       Product          @relation(fields: [productId], references: [id])
+
+  @@id([reservationId, productId])
+}

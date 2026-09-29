@@ -1,0 +1,1 @@
+export type CartOwner = { type: "USER" | "GUEST"; id: string };

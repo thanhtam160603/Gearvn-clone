@@ -1,0 +1,37 @@
+generator client {
+    provider            = "prisma-client"
+    output              = "../src/generated/prisma"
+    runtime             = "nodejs"
+    moduleFormat        = "esm"
+    importFileExtension = "ts"
+  }
+
+  datasource db {
+    provider = "postgresql"
+  }
+
+  enum CartOwnerType {
+    GUEST
+    USER
+  }
+  model Cart {
+    id        String        @id @default(cuid())
+    ownerType CartOwnerType
+    ownerId   String
+    version   Int           @default(0)
+    items     CartItem[]
+    createdAt DateTime      @default(now())
+    updatedAt DateTime      @updatedAt
+    @@unique([ownerType, ownerId])
+  }
+  model CartItem {
+    id        String   @id @default(cuid())
+    cartId    String
+    productId String
+    quantity  Int
+    selected  Boolean  @default(true)
+    cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    @@unique([cartId, productId])
+  }
