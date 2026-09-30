@@ -4,9 +4,13 @@ import { z } from "zod";
 import type { CartEnv } from "../config/cart-env";
 
 const productSchema = z.object({
-  id: z.string(), slug: z.string(), name: z.string(), image: z.string(),
+  id: z.string(), 
+  slug: z.string(), 
+  name: z.string(), 
+  image: z.string().nullable(),
   salePrice: z.number().int().nonnegative(),
-  available: z.number().int().nonnegative(), status: z.string(),
+  available: z.number().int().nonnegative(), 
+  status: z.string(),
 });
 const resolveSchema = z.object({
   items: z.array(productSchema), missingProductIds: z.array(z.string()),
@@ -32,6 +36,7 @@ export class CatalogClientService {
                 headers: {
                     "Content-Type": "application/json",
                     ...(requestId ? { "X-Request-Id": requestId } : {}),
+                    'x-internal-service-key': this.config.get('INTERNAL_SERVICE_KEY', { infer: true }),
                 },
                 body: JSON.stringify({ productIds }),
             });

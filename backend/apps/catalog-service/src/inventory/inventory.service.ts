@@ -45,7 +45,9 @@ export class InventoryService {
 
   private async replay(row: Reservation, requestHash: string) {
     if (row.requestHash !== requestHash) {
-      throw new ConflictException("Idempotency-Key đã dùng với nội dung khác");
+      throw new ConflictException({
+        code: 'IDEMPOTENCY_CONFLICT', message: 'Key đã dùng với nội dung khác',
+      });
     }
     if (row.status === "PENDING" && row.expiresAt.getTime() <= Date.now()) {
       return this.finish(row.id, "EXPIRED");
@@ -104,7 +106,9 @@ export class InventoryService {
               },
             });
             if (updated.count !== 1) {
-              throw new ConflictException("Không đủ tồn kho: " + line.productId);
+              throw new ConflictException({
+                code: 'INSUFFICIENT_STOCK', message: 'Không đủ tồn kho',
+              });
             }
           }
           return toView(reservation);
@@ -131,11 +135,22 @@ export class InventoryService {
       const row = await tx.stockReservation.findUnique({
         where: { id }, include: reservationInclude,
       });
-      if (!row) throw new NotFoundException("Không tìm thấy reservation");
+      if (!row) {
+        throw new NotFoundException({
+          code: 'RESERVATION_NOT_FOUND',
+          message: 'Reservation không tồn tại',
+        });
+      }
 
-      if (row.status !== "PENDING") {
-        if (row.status === requested || row.status === "EXPIRED") return toView(row);
-        throw new ConflictException("Reservation đã kết thúc: " + row.status);
+      if (row.status !== 'PENDING') {
+        if (row.status === requested || row.status === 'EXPIRED') {
+          return toView(row);
+        }
+
+        throw new ConflictException({
+          code: 'RESERVATION_STATE_CONFLICT',
+          message: 'Reservation đã kết thúc',
+        });
       }
       const expired = row.expiresAt.getTime() <= Date.now();
       if (requested === "EXPIRED" && !expired) return toView(row);
@@ -153,7 +168,10 @@ export class InventoryService {
         if (latest.status === requested || latest.status === "EXPIRED") {
           return toView(latest);
         }
-        throw new ConflictException("Reservation vừa được xử lý bởi request khác");
+        throw new ConflictException({
+          code: 'RESERVATION_STATE_CONFLICT',
+          message: 'Reservation vừa được xử lý bởi request khác',
+        });      
       }
 
       const orderedItems = [...row.items].sort((a, b) =>
@@ -178,7 +196,10 @@ export class InventoryService {
 
     // Throw SAU commit để stock của reservation hết hạn vẫn được hoàn lại.
     if (requested === "CONFIRMED" && result.status === "EXPIRED") {
-      throw new ConflictException("Reservation đã hết hạn, không thể confirm");
+      throw new ConflictException({
+        code: 'RESERVATION_EXPIRED',
+        message: 'Reservation đã hết hạn, không thể confirm',
+      });
     }
     return result;
   }
@@ -196,5 +217,14 @@ export class InventoryService {
         if (!(error instanceof ConflictException)) throw error;
       }
     }
+  }
+  async findReservationByKey(key: string) {
+    const row = await this.prisma.stockReservation.findUnique({
+      where: { idempotencyKey: key }, include: reservationInclude,
+    });
+    if (!row) throw new NotFoundException({
+      code: 'RESERVATION_NOT_FOUND', message: 'Reservation không tồn tại',
+    });
+    return toView(row);
   }
 }

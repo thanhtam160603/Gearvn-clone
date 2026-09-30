@@ -1,15 +1,18 @@
 import { MiddlewareConsumer, Module, type NestModule } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
-
+import { CartGatewayModule } from './cart/cart-gateway.module';
 import { RequestIdMiddleware } from "@app/common";
 import { ServiceConfigModule } from "@app/config/service-config.module";
 import { CatalogGatewayModule } from "./catalog/catalog-gateway.module";
+import { OrderGatewayModule } from "./orders/order-gateway.module";
 
 @Module({
   imports: [
     ServiceConfigModule.forService("api-gateway"), // cung cấp cấu hình cho api-gateway
     CatalogGatewayModule,
+    CartGatewayModule,
+    OrderGatewayModule,
     // cấu hình giới hạn tần suất request
     ThrottlerModule.forRoot([
       {

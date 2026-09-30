@@ -13,6 +13,9 @@ import { CollectionsService } from "./collections/collections.service";
 import { InventoryInternalController } from "./inventory/inventory.internal.controller";
 import { InventoryService } from "./inventory/inventory.service";
 import { ReservationExpiryService } from "./inventory/reservation-expiry.service";
+import { ProductResolveController } from "./internal/product-resolve.controller";
+import { InternalServiceGuard } from '@app/common';
+
 
 @Module({
   imports: [
@@ -20,12 +23,18 @@ import { ReservationExpiryService } from "./inventory/reservation-expiry.service
     PrismaModule,
   ],
   controllers: [
-    ProductsController, CategoriesController, CollectionsController,
-    InventoryInternalController,
+    ProductsController, 
+    CategoriesController, 
+    CollectionsController,
+    InventoryInternalController, 
+    ProductResolveController,
   ],
   providers: [
-    ProductsService, CollectionsService, InventoryService,
-    ReservationExpiryService,
+    ProductsService, 
+    CollectionsService, 
+    InventoryService,
+    ReservationExpiryService, 
+    InternalServiceGuard,
   ],
 })
 export class CatalogServiceModule implements NestModule {

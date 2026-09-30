@@ -1,0 +1,184 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CheckoutStatus {
+  PROCESSING
+  ORDER_WRITTEN
+  COMPENSATION_PENDING
+  COMPLETED
+  FAILED
+}
+enum CleanupStatus {
+  PENDING
+  DONE
+  SKIPPED
+}
+enum OrderStatus {
+  PENDING_CONFIRMATION
+  PLACED
+  CANCELLATION_PENDING
+  SHIPPING
+  DELIVERED
+  CANCELLED
+}
+enum PaymentMethod {
+  COD
+}
+enum WarrantyStatus {
+  OPEN
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+model CheckoutRequest {
+  id                   String         @id @default(uuid())
+  userId               String
+  key                  String
+  bodyHash             String
+  cartId               String
+  cartVersion          Int
+  cartSnapshot         Json
+  productSnapshot      Json
+  addressSnapshot      Json
+  paymentMethod        PaymentMethod  @default(COD)
+  subtotal             Int
+  shippingFee          Int            @default(0)
+  discountAmount       Int            @default(0)
+  totalAmount          Int
+  reservationKey       String         @unique
+  reservationExpiresAt DateTime
+  reservationId        String?        @unique
+  status               CheckoutStatus @default(PROCESSING)
+  cleanupStatus        CleanupStatus  @default(PENDING)
+  failureCode          String?
+  lastErrorCode        String?
+  attempts             Int            @default(0)
+  nextAttemptAt        DateTime       @default(now())
+  needsAttention       Boolean        @default(false)
+  order                Order?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  @@unique([userId, key])
+  @@index([status, nextAttemptAt])
+  @@index([cleanupStatus, nextAttemptAt])
+}
+
+model Order {
+  id                     String               @id @default(uuid())
+  userId                 String
+  checkoutRequestId      String               @unique
+  checkoutRequest        CheckoutRequest      @relation(fields: [checkoutRequestId], references: [id], onDelete: Restrict)
+  reservationId          String               @unique
+  status                 OrderStatus          @default(PENDING_CONFIRMATION)
+  paymentMethod          PaymentMethod        @default(COD)
+  subtotal               Int
+  shippingFee            Int                  @default(0)
+  discountAmount         Int                  @default(0)
+  totalAmount            Int
+  placedAt               DateTime?
+  shippedAt              DateTime?
+  deliveredAt            DateTime?
+  cancelledAt            DateTime?
+  cancellationAttempts   Int                  @default(0)
+  cancellationRetryAt    DateTime?
+  cancellationErrorCode  String?
+  cancellationNeedsAttention Boolean          @default(false)
+  items                  OrderItem[]
+  address                OrderAddress?
+  history                OrderStatusHistory[]
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  @@index([userId, createdAt, id])
+  @@index([status, cancellationRetryAt])
+}
+
+model OrderItem {
+  id          String            @id @default(uuid())
+  orderId     String
+  order       Order             @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  productId   String
+  sku         String
+  productName String
+  image       String?
+  unitPrice   Int
+  quantity    Int
+  lineTotal   Int
+  warranties  WarrantyRequest[]
+
+  @@unique([orderId, productId])
+}
+
+model OrderAddress {
+  id            String @id @default(uuid())
+  orderId       String @unique
+  order         Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  recipientName String
+  phone         String
+  addressLine   String
+  ward          String
+  district      String
+  city          String
+  note          String?
+}
+
+model OrderStatusHistory {
+  id         String       @id @default(uuid())
+  orderId    String
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  actorId    String?
+  reason     String?
+  createdAt  DateTime      @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+model WarrantyRequest {
+  id          String                  @id @default(uuid())
+  userId      String
+  orderItemId String
+  orderItem   OrderItem               @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  status      WarrantyStatus         @default(OPEN)
+  reason      String
+  description String?
+  history     WarrantyStatusHistory[]
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@index([userId, createdAt, id])
+}
+
+model WarrantyStatusHistory {
+  id         String          @id @default(uuid())
+  warrantyId String
+  warranty   WarrantyRequest @relation(fields: [warrantyId], references: [id], onDelete: Restrict)
+  fromStatus WarrantyStatus?
+  toStatus   WarrantyStatus
+  actorId    String
+  note       String?
+  createdAt  DateTime        @default(now())
+
+  @@index([warrantyId, createdAt])
+}
+
+model WorkflowLease {
+  key       String   @id
+  owner     String
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}

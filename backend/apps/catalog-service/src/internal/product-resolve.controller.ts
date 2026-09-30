@@ -1,8 +1,11 @@
 import { Body, Controller, HttpCode, Post } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
 import { ProductIdsDto } from "./product-resolve.dto";
+import { InternalServiceGuard } from "@app/common";
+import { UseGuards } from "@nestjs/common";
 
 @Controller("internal/catalog/products")
+@UseGuards(InternalServiceGuard)
 export class ProductResolveController {
     constructor(private readonly prisma: PrismaService) {}
 
@@ -14,6 +17,7 @@ export class ProductResolveController {
             select: {
                 id: true,
                 slug: true,
+                sku: true,
                 name: true,
                 salePrice: true,
                 status: true,
@@ -34,6 +38,7 @@ export class ProductResolveController {
                 return row ? [{
                     id: row.id,
                     slug: row.slug,
+                    sku: row.sku,
                     name: row.name,
                     image: row.images[0]?.url ?? null,
                     salePrice: row.salePrice,

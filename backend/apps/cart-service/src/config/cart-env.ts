@@ -8,6 +8,7 @@ export const cartEnvSchema = baseEnvSchema.safeExtend({
   CATALOG_SERVICE_URL: z.url(),
   JWT_PUBLIC_KEY: z.string().min(1),
   CART_COOKIE_SECRET: z.string().min(32),
+  INTERNAL_SERVICE_KEY: z.string().min(32),
 });
 export type CartEnv = z.infer<typeof cartEnvSchema>;
 

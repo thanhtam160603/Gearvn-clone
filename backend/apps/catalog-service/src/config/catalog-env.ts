@@ -7,6 +7,7 @@ export const catalogEnvSchema = z.object({
   HTTP_HOST: z.string().min(1).default("127.0.0.1"),
   FRONTEND_ORIGIN: z.url(),
   CATALOG_DATABASE_URL: z.url(),
+  INTERNAL_SERVICE_KEY: z.string().min(32),
 });
 
 export type CatalogEnv = z.infer<typeof catalogEnvSchema>;

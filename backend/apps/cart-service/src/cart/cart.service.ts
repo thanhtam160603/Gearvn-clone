@@ -66,7 +66,7 @@ export class CartService {
         await tx.cartItem.upsert({
             where: { cartId_productId: { cartId: cart.id, productId } },
             create: { cartId: cart.id, productId, quantity, selected: true },
-            update: { quantity }, // giữ selected hiện có
+            update: { quantity, version: { increment: 1 } }, // giữ selected hiện có
         });
         const updated = await tx.cart.update({
             where: { id: cart.id }, data: { version: { increment: 1 } },
@@ -100,7 +100,7 @@ export class CartService {
         const cart = await tx.cart.findUnique({ where: this.key(owner) });
         if (!cart) throw new NotFoundException("Cart item không tồn tại");
         const changed = await tx.cartItem.updateMany({
-            where: { cartId: cart.id, productId }, data: { selected },
+            where: { cartId: cart.id, productId }, data: { selected, version: { increment: 1 } },
         });
         if (changed.count !== 1) throw new NotFoundException("Cart item không tồn tại");
         const updated = await tx.cart.update({
@@ -137,6 +137,78 @@ export class CartService {
             where: { id: cart.id }, data: { version: { increment: 1 } },
         });
         return { cartId: updated.id, version: updated.version };
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }));
+    }
+    async merge(user: CartOwner, guestId: string | null, requestId?: string) {
+        if (user.type !== "USER") throw new ConflictException("Merge cần USER owner");
+        if (!guestId) {
+            const cart = await this.findOrCreate(user);
+            return { cartId: cart.id, version: cart.version, clampedProductIds: [] };
+        }
+        const guestKey = this.key({ type: "GUEST", id: guestId });
+        const guest = await this.prisma.cart.findUnique({
+            where: guestKey, include: cartInclude,
+        });
+        if (!guest) {
+            const cart = await this.findOrCreate(user);
+            return { cartId: cart.id, version: cart.version, clampedProductIds: [] };
+        }
+
+        // Catalog HTTP nằm ngoài transaction Cart DB.
+        const lookup = await this.catalog.resolve(guest.items.map((i) => i.productId), requestId);
+        const products = new Map(lookup.items.map((p) => [p.id, p]));
+        if (lookup.missingProductIds.length ||
+            guest.items.some((item) => (products.get(item.productId)?.available ?? 0) < 1)) {
+            throw new ConflictException("Guest cart có sản phẩm không còn bán/còn hàng");
+        }
+
+        return this.retry(() => this.prisma.$transaction(async (tx) => {
+            const freshGuest = await tx.cart.findUnique({ where: guestKey, include: cartInclude });
+            const userCart = await tx.cart.upsert({
+            where: this.key(user),
+            create: { ownerType: "USER", ownerId: user.id },
+            update: {}, include: cartInclude,
+            });
+            // Một request merge khác đã hoàn tất: không cộng lại lần hai.
+            if (!freshGuest) {
+            return { cartId: userCart.id, version: userCart.version, clampedProductIds: [] };
+            }
+            const existingIds = new Set(userCart.items.map((item) => item.productId));
+            const newIds = freshGuest.items.filter((item) => !existingIds.has(item.productId));
+            if (existingIds.size + newIds.length > 100) {
+            throw new ConflictException("Giỏ hàng sau merge vượt 100 sản phẩm");
+            }
+            const clampedProductIds: string[] = [];
+            for (const guestItem of freshGuest.items) {
+            const product = products.get(guestItem.productId);
+            if (!product || product.available < 1) {
+                // Guest cart đổi trong lúc gọi Catalog: rollback, không xóa guest.
+                throw new ConflictException("Guest cart đã thay đổi, vui lòng thử lại");
+            }
+            const old = await tx.cartItem.findUnique({
+                where: { cartId_productId: {
+                cartId: userCart.id, productId: guestItem.productId,
+                } },
+            });
+            const requested = (old?.quantity ?? 0) + guestItem.quantity;
+            const quantity = Math.min(requested, 99, product.available);
+            if (quantity < requested) clampedProductIds.push(guestItem.productId);
+            await tx.cartItem.upsert({
+                where: { cartId_productId: {
+                cartId: userCart.id, productId: guestItem.productId,
+                } },
+                create: {
+                cartId: userCart.id, productId: guestItem.productId,
+                quantity, selected: guestItem.selected,
+                },
+                update: { quantity }, // giữ selected của user item nếu đã tồn tại
+            });
+            }
+            await tx.cart.delete({ where: { id: freshGuest.id } });
+            const updated = await tx.cart.update({
+            where: { id: userCart.id }, data: { version: { increment: 1 } },
+            });
+            return { cartId: updated.id, version: updated.version, clampedProductIds };
         }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }));
     }
 }

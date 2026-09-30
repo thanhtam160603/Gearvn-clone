@@ -1,18 +1,19 @@
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
+import { configureHttpApp } from '@app/common';
 import { OrderServiceModule } from './order-service.module';
-
-import { configureHttpApp } from "@app/common";
-import type { BaseEnv } from "@app/config";
-import { ConfigService } from "@nestjs/config";
+import type { OrderEnv } from './config/order-env';
 
 async function bootstrap() {
   const app = await NestFactory.create(OrderServiceModule);
-  const config = app.get(ConfigService<BaseEnv, true>);
-
+  const config = app.get(ConfigService<OrderEnv, true>);
   configureHttpApp(app, {
-    frontendOrigin: config.get("FRONTEND_ORIGIN", { infer: true })
+    frontendOrigin: config.get("FRONTEND_ORIGIN", { infer: true }),
   });
-
-  await app.listen(config.get("PORT", { infer: true }));
+  app.enableShutdownHooks();
+  await app.listen(
+    config.get('PORT', { infer: true }),
+    config.get('HTTP_HOST', { infer: true }),
+  );
 }
 void bootstrap();
