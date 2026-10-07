@@ -27,7 +27,7 @@ export function configureApiAuth(hooks: AuthHooks): void {
 
 const baseURL = typeof window === "undefined"
   ? process.env.API_UPSTREAM_ORIGIN || process.env.NEXT_PUBLIC_API_BASE_URL
-  : process.env.NEXT_PUBLIC_API_BASE_URL;
+  : process.env.NODE_ENV === "production" ? undefined : process.env.NEXT_PUBLIC_API_BASE_URL;
 export const apiClient = axios.create({ baseURL, withCredentials: true });
 export const authClient = axios.create({ baseURL, withCredentials: true });
 
