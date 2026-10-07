@@ -22,9 +22,11 @@ export default function ChatWidget() {
   const {
     readyForUser, messages, nextCursor, status, draft, setDraft, pending,
     error, loadingOlder, scrollRef, sendMessage, retryPending, loadOlder,
+    resetConnection,
   } = useCustomerChat(open, userId, accessToken);
 
   function closeWidget() {
+    resetConnection();
     setOpen(false);
     requestAnimationFrame(() => launcherRef.current?.focus());
   }

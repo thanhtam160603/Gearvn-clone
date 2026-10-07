@@ -80,10 +80,12 @@ export function useCustomerChat(open: boolean, userId: string | undefined, acces
       socketRef.current = socket;
 
       socket.onopen = () => {
+        if (stopped || socketRef.current !== socket) return;
         socket.send(JSON.stringify({ event: "chat.auth", data: { token: accessToken } }));
       };
 
       socket.onmessage = (messageEvent) => {
+        if (stopped || socketRef.current !== socket) return;
         const frame = readChatSocketEvent(String(messageEvent.data));
         if (!frame) return;
 
@@ -183,6 +185,14 @@ export function useCustomerChat(open: boolean, userId: string | undefined, acces
     socket.send(JSON.stringify({ event: "chat.message.send", data: { conversationId: activeConversationId, clientMessageId: pendingRef.current.clientMessageId, body: pendingRef.current.body } }));
   }
 
+  function resetConnection() {
+    // Load the conversation again before opening a socket for the next widget session.
+    setConversationId(null);
+    setLoadedUserId(null);
+    setStatus("loading");
+    setError("");
+  }
+
   async function loadOlder() {
     if (!activeConversationId || !nextCursor || loadingOlder) return;
     setLoadingOlder(true);
@@ -202,5 +212,6 @@ export function useCustomerChat(open: boolean, userId: string | undefined, acces
   return {
     readyForUser, messages, nextCursor, status, draft, setDraft, pending,
     error, loadingOlder, scrollRef, sendMessage, retryPending, loadOlder,
+    resetConnection,
   };
 }
