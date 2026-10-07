@@ -1,0 +1,3 @@
+api.167-172-73-163.sslip.io {
+    reverse_proxy 127.0.0.1:4000
+}
