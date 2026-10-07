@@ -17,5 +17,5 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsDateString()
-  birthDate?: string;
+  birthDate?: string | null;
 }

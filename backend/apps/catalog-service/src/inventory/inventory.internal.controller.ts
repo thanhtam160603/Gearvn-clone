@@ -1,5 +1,6 @@
-import { Body, Controller, Headers, HttpCode, Param, Post } from "@nestjs/common";
-import { AvailabilityDto, ReserveStockDto } from "./dto/inventory.dto";
+import { Body, Controller, Get, Headers, Param, Post, UseGuards } from "@nestjs/common";
+import { InternalServiceGuard } from "@app/common";
+import { AvailabilityDto, ReserveStockDto, ReturnStockDto } from "./dto/inventory.dto";
 import { InventoryService } from "./inventory.service";
 
 @Controller("internal/inventory")
@@ -14,6 +15,18 @@ export class InventoryInternalController {
     @Post("reservations")
     reservation(@Body() dto: ReserveStockDto, @Headers("idempotency-key") idempotencyKey: string | undefined) {
         return this.inventoryService.reserve(dto, idempotencyKey);
+    }
+
+    @Get("reservations/by-key/:key")
+    @UseGuards(InternalServiceGuard)
+    reservationByKey(@Param("key") key: string) {
+        return this.inventoryService.findReservationByKey(key);
+    }
+
+    @Post("returns")
+    @UseGuards(InternalServiceGuard)
+    returnStock(@Body() dto: ReturnStockDto, @Headers("idempotency-key") key: string | undefined) {
+        return this.inventoryService.returnStock(dto, key);
     }
 
     @Post("reservations/:id/confirm")

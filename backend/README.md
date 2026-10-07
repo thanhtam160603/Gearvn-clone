@@ -23,7 +23,59 @@
 
 ## Description
 
+## Chat realtime bằng WebSocket thuần
+
+API Gateway nhận WebSocket trên cùng cổng HTTP, đường dẫn `/chat`. Trình duyệt
+dùng `new WebSocket('ws://localhost:4000/chat')` ở môi trường local; production
+dùng `wss://` sau TLS proxy. Không dùng Socket.IO client cho endpoint này.
+
+Mỗi frame là JSON UTF-8 dạng `{ "event": "...", "data": { ... } }`. Ngay khi
+`open`, gửi access token trong vòng 5 giây (không đặt token vào URL):
+
+```ts
+const socket = new WebSocket('ws://localhost:4000/chat');
+socket.addEventListener('open', () => {
+  socket.send(JSON.stringify({ event: 'chat.auth', data: { token: accessToken } }));
+});
+socket.addEventListener('message', ({ data }) => {
+  const frame = JSON.parse(String(data));
+  console.log(frame.event, frame.data);
+});
+```
+
+Sau `chat.auth.ok`, gửi `chat.conversation.join` với
+`{ conversationId }`. Chỉ khi nhận `chat.conversation.joined` mới gửi
+`chat.message.send` với `{ conversationId, clientMessageId, body }`.
+Gateway hỏi Chat Service để kiểm quyền tham gia, và Chat Service kiểm quyền
+lại khi lưu. Tin mới đã lưu được phát bằng `chat.message.created`; người gửi
+nhận `chat.message.ack`. Nếu chưa nhận ACK, gửi lại cùng `clientMessageId`
+**và cùng body** để tránh tạo tin trùng. `chat.error` chứa mã lỗi an toàn.
+
+Khi mất kết nối, đăng nhập và join lại rồi tải lịch sử qua REST để bù các tin
+đã bỏ lỡ; ACK không có nghĩa người nhận đã đọc. Room hiện được giữ trong bộ nhớ
+của **một** API Gateway instance, chưa hỗ trợ fanout giữa nhiều replica.
+
+Xem [kế hoạch WebSocket thuần](../docs/superpowers/plans/2026-10-01-chat-native-websocket-plan.md)
+và [thiết kế giao thức](../docs/superpowers/specs/2026-10-01-chat-native-websocket-design.md).
+
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+
+## Thử API qua Gateway và Swagger
+
+Chạy lệnh từ thư mục `backend/` trong các terminal riêng:
+
+```powershell
+yarn.cmd nest start identity-service --watch
+yarn.cmd start:gateway:dev
+```
+
+Gateway đọc `apps/api-gateway/.env`; cần có `IDENTITY_SERVICE_URL=http://127.0.0.1:4001` như trong `.env.example`. Identity Service cần PostgreSQL và các biến môi trường trong `apps/identity-service/.env`.
+
+Mở `http://127.0.0.1:4000/docs` (`/docs-json` là OpenAPI JSON). Swagger chỉ bật khi `NODE_ENV` không phải `production`. Các đường dẫn bắt đầu bằng `/api`, ví dụ `POST /api/auth/login`, `POST /api/auth/refresh`, `GET /api/users/me`.
+
+Thử `POST /api/auth/login` để nhận access token, sau đó dùng nút **Authorize** nhập token (không thêm chữ `Bearer`) để gọi `GET /api/users/me`. Refresh token nằm trong cookie HttpOnly do Identity trả qua Gateway; giữ cùng host `127.0.0.1` khi mở Swagger và gọi API để trình duyệt gửi cookie. Swagger UI không cho tự điền `Cookie` header; sau khi login, browser sẽ tự quản lý cookie cho `/api/auth/refresh` và `/api/auth/logout`.
+
+Kiểm tra proxy Gateway: `yarn.cmd test:gateway`.
 
 ## Project setup
 

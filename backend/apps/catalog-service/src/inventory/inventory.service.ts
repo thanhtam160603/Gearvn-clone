@@ -5,7 +5,7 @@ import {
 } from "@nestjs/common";
 import { Prisma } from "../generated/prisma/client";
 import { PrismaService } from "../database/prisma.service";
-import type { ReserveStockDto } from "./dto/inventory.dto";
+import type { ReserveStockDto, ReturnStockDto } from "./dto/inventory.dto";
 
 const reservationInclude = {
   items: { orderBy: { productId: "asc" } },
@@ -226,5 +226,82 @@ export class InventoryService {
       code: 'RESERVATION_NOT_FOUND', message: 'Reservation không tồn tại',
     });
     return toView(row);
+  }
+
+  async returnStock(dto: ReturnStockDto, key: string | undefined) {
+    if (key !== `cancel:${dto.orderId}`) {
+      throw new BadRequestException("Idempotency-Key không hợp lệ");
+    }
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        return await this.prisma.$transaction(async (tx) => {
+          const existing = await tx.stockReturn.findUnique({ where: { orderId: dto.orderId } });
+          if (existing && existing.reservationId !== dto.reservationId) {
+            throw new ConflictException({
+              code: "STOCK_RETURN_CONFLICT", message: "Đơn hàng đã hoàn kho với reservation khác",
+            });
+          }
+
+          const reservation = await tx.stockReservation.findUnique({
+            where: { id: dto.reservationId }, include: reservationInclude,
+          });
+          if (!reservation) {
+            throw new NotFoundException({
+              code: "RESERVATION_NOT_FOUND", message: "Reservation không tồn tại",
+            });
+          }
+          if (reservation.status !== "CONFIRMED") {
+            throw new ConflictException({
+              code: "RESERVATION_STATE_CONFLICT", message: "Reservation chưa được xác nhận",
+            });
+          }
+
+          if (existing) return {
+            returnId: existing.id,
+            orderId: existing.orderId,
+            reservationId: existing.reservationId,
+            status: "RETURNED" as const,
+            lines: toView(reservation).lines,
+            createdAt: existing.createdAt.toISOString(),
+          };
+
+          const stockReturn = await tx.stockReturn.create({
+            data: { orderId: dto.orderId, reservationId: dto.reservationId },
+          });
+          for (const line of reservation.items) {
+            const updated = await tx.inventory.updateMany({
+              where: {
+                productId: line.productId,
+                available: { lte: 2_147_483_647 - line.quantity },
+              },
+              data: { available: { increment: line.quantity } },
+            });
+            if (updated.count !== 1) {
+              throw new InternalServerErrorException("Không thể hoàn tồn kho");
+            }
+          }
+          return {
+            returnId: stockReturn.id,
+            orderId: stockReturn.orderId,
+            reservationId: stockReturn.reservationId,
+            status: "RETURNED" as const,
+            lines: toView(reservation).lines,
+            createdAt: stockReturn.createdAt.toISOString(),
+          };
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+      } catch (error: unknown) {
+        if (hasPrismaCode(error, "P2002")) {
+          const winner = await this.prisma.stockReturn.findUnique({ where: { orderId: dto.orderId } });
+          if (winner && winner.reservationId === dto.reservationId) continue;
+          throw new ConflictException({
+            code: "STOCK_RETURN_CONFLICT", message: "Reservation đã được hoàn kho cho đơn khác",
+          });
+        }
+        if (hasPrismaCode(error, "P2034") && attempt < 2) continue;
+        throw error;
+      }
+    }
+    throw new InternalServerErrorException("Không thể hoàn tồn kho");
   }
 }

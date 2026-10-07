@@ -18,7 +18,12 @@ export class CheckoutRecoveryService implements OnModuleInit, OnModuleDestroy {
     this.timer = setInterval(() => {
       if (this.stopping || this.active) return;
       this.active = this.tick()
-        .catch(() => { this.logger.error('RECOVERY_TICK_FAILED'); })
+        .catch((error: unknown) => {
+          this.logger.error(
+            'RECOVERY_TICK_FAILED',
+            error instanceof Error ? error.stack ?? error.message : String(error),
+          );
+        })
         .finally(() => { this.active = undefined; });
     }, 5_000);
   }

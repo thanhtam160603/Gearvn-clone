@@ -1,0 +1,59 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ConversationStatus {
+  OPEN
+  CLOSED
+}
+
+enum ChatRole {
+  CUSTOMER
+  SUPPORT
+}
+
+model Conversation {
+  id                String                    @id @default(uuid())
+  customerId        String
+  assignedSupportId String?
+  status            ConversationStatus        @default(OPEN)
+  participants      ConversationParticipant[]
+  messages          Message[]
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  closedAt          DateTime?
+
+  @@index([status, updatedAt])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  userId         String
+  role           ChatRole
+  joinedAt       DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id              String       @id @default(uuid())
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
+  senderId        String
+  clientMessageId String
+  body            String
+  createdAt       DateTime     @default(now())
+
+  @@unique([senderId, clientMessageId])
+  @@index([conversationId, createdAt, id])
+}

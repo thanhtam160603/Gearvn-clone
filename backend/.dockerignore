@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+node_modules
+dist
+.yarn
+*.log
+deploy/*.env
+**/src/generated

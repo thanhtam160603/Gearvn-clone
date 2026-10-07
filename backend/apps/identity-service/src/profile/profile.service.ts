@@ -48,7 +48,9 @@ export class ProfileService {
     }
 
     if (input.birthDate !== undefined) {
-      profileData.birthDate = new Date(input.birthDate);
+      profileData.birthDate = input.birthDate === null
+        ? null
+        : new Date(input.birthDate);
     }
 
     if (Object.keys(profileData).length === 0) {

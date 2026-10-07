@@ -1,0 +1,118 @@
+name: gearvn-backend-trial
+
+x-backend: &backend
+  image: gearvn-backend:trial
+  build: .
+  init: true
+  restart: "no"
+  networks:
+    - private
+
+x-common-env: &common-env
+  NODE_ENV: production
+  FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:?Set FRONTEND_ORIGIN}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gearvn
+      POSTGRES_USER: gearvn
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    command: ["postgres", "-c", "shared_buffers=32MB"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/init-databases.sh:/docker-entrypoint-initdb.d/01-init-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gearvn -d gearvn"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - private
+
+  identity-service:
+    <<: *backend
+    command: node dist/apps/identity-service/main.js
+    environment:
+      <<: *common-env
+      SERVICE_NAME: identity-service
+      PORT: 4001
+      IDENTITY_DATABASE_URL: postgresql://gearvn:${POSTGRES_PASSWORD}@postgres:5432/identity_db
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:?Set JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?Set JWT_PUBLIC_KEY}
+
+  catalog-service:
+    <<: *backend
+    command: node dist/apps/catalog-service/main.js
+    environment:
+      <<: *common-env
+      SERVICE_NAME: catalog-service
+      PORT: 4002
+      HTTP_HOST: 0.0.0.0
+      CATALOG_DATABASE_URL: postgresql://gearvn:${POSTGRES_PASSWORD}@postgres:5432/catalog_db
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Set INTERNAL_SERVICE_KEY}
+
+  cart-service:
+    <<: *backend
+    command: node dist/apps/cart-service/main.js
+    environment:
+      <<: *common-env
+      SERVICE_NAME: cart-service
+      PORT: 4003
+      HTTP_HOST: 0.0.0.0
+      CART_DATABASE_URL: postgresql://gearvn:${POSTGRES_PASSWORD}@postgres:5432/cart_db
+      CATALOG_SERVICE_URL: http://catalog-service:4002
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?Set JWT_PUBLIC_KEY}
+      CART_COOKIE_SECRET: ${CART_COOKIE_SECRET:?Set CART_COOKIE_SECRET}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Set INTERNAL_SERVICE_KEY}
+
+  order-service:
+    <<: *backend
+    command: node dist/apps/order-service/main.js
+    environment:
+      <<: *common-env
+      SERVICE_NAME: order-service
+      PORT: 4004
+      HTTP_HOST: 0.0.0.0
+      ORDER_DATABASE_URL: postgresql://gearvn:${POSTGRES_PASSWORD}@postgres:5432/order_db
+      CART_SERVICE_URL: http://cart-service:4003
+      CATALOG_SERVICE_URL: http://catalog-service:4002
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?Set JWT_PUBLIC_KEY}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Set INTERNAL_SERVICE_KEY}
+
+  chat-service:
+    <<: *backend
+    command: node dist/apps/chat-service/main.js
+    environment:
+      <<: *common-env
+      SERVICE_NAME: chat-service
+      PORT: 4005
+      HTTP_HOST: 0.0.0.0
+      CHAT_DATABASE_URL: postgresql://gearvn:${POSTGRES_PASSWORD}@postgres:5432/chat_db
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?Set JWT_PUBLIC_KEY}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Set INTERNAL_SERVICE_KEY}
+
+  api-gateway:
+    <<: *backend
+    command: node dist/apps/api-gateway/main.js
+    ports:
+      - "127.0.0.1:4000:4000"
+    environment:
+      <<: *common-env
+      SERVICE_NAME: api-gateway
+      PORT: 4000
+      IDENTITY_SERVICE_URL: http://identity-service:4001
+      CATALOG_SERVICE_URL: http://catalog-service:4002
+      CART_SERVICE_URL: http://cart-service:4003
+      ORDER_SERVICE_URL: http://order-service:4004
+      CHAT_SERVICE_URL: http://chat-service:4005
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:?Set JWT_PUBLIC_KEY}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?Set INTERNAL_SERVICE_KEY}
+
+networks:
+  private:
+
+volumes:
+  postgres_data:

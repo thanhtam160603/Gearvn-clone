@@ -39,7 +39,7 @@ export class OrdersService {
     async detail(userId: string, orderId: string) {
         const row = await this.db.order.findFirst({
             where: {
-                orderId,
+                id: orderId,
                 userId,
                 placedAt: { not: null },
             },

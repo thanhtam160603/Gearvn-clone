@@ -21,7 +21,7 @@ export class OrderCancellationService {
     {
         await transaction(this.prisma, async (tx) => {
             const row = await tx.order.findFirst({
-                where: { orderId, userId, placedAt: { not: null } },
+                where: { id: orderId, userId, placedAt: { not: null } },
             });
             if (!row) throw new NotFoundException();
             if (row.status === 'CANCELLED' || row.status === 'CANCELLATION_PENDING') return;
@@ -29,10 +29,10 @@ export class OrderCancellationService {
                 code: 'ORDER_STATE_CONFLICT', message: 'Đơn hàng không thể hủy',
             });
             const changed = await tx.order.updateMany({
-                where: { orderId, userId, status: 'PLACED' },
-                data: { 
-                    status: 'CANCELLATION_PENDING', 
-                    cancellationRequestedAt: new Date()
+                where: { id: orderId, userId, status: 'PLACED' },
+                data: {
+                    status: 'CANCELLATION_PENDING',
+                    cancellationRetryAt: new Date(),
                 },
             });
             if (changed.count !== 1) throw new ConflictException('Order đã thay đổi');
@@ -48,7 +48,7 @@ export class OrderCancellationService {
         })
         await this.run(orderId, requestId);
         const row = await this.prisma.order.findFirstOrThrow({
-            where: { orderId, userId },
+            where: { id: orderId, userId },
             include: orderInclude,
         });
         return toOrderView(row);
@@ -69,7 +69,11 @@ export class OrderCancellationService {
             await this.workflowLease.assertOwned(tx, key, owner);
             const changed = await tx.order.updateMany({
             where: { id, status: 'CANCELLATION_PENDING' },
-            data: { status: 'CANCELLED', cancelledAt: new Date(), cancellationErrorCode: null },
+            data: {
+                status: 'CANCELLED', cancelledAt: new Date(),
+                cancellationErrorCode: null, cancellationRetryAt: null,
+                cancellationNeedsAttention: false,
+            },
             });
             if (changed.count === 1) await tx.orderStatusHistory.create({ data: {
             orderId: id, fromStatus: 'CANCELLATION_PENDING', toStatus: 'CANCELLED',

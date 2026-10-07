@@ -191,6 +191,7 @@ export type StockReservationWhereInput = {
   expiresAt?: Prisma.DateTimeFilter<"StockReservation"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"StockReservation"> | Date | string
   items?: Prisma.StockReservationItemListRelationFilter
+  stockReturn?: Prisma.XOR<Prisma.StockReturnNullableScalarRelationFilter, Prisma.StockReturnWhereInput> | null
 }
 
 export type StockReservationOrderByWithRelationInput = {
@@ -201,6 +202,7 @@ export type StockReservationOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   items?: Prisma.StockReservationItemOrderByRelationAggregateInput
+  stockReturn?: Prisma.StockReturnOrderByWithRelationInput
 }
 
 export type StockReservationWhereUniqueInput = Prisma.AtLeast<{
@@ -214,6 +216,7 @@ export type StockReservationWhereUniqueInput = Prisma.AtLeast<{
   expiresAt?: Prisma.DateTimeFilter<"StockReservation"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"StockReservation"> | Date | string
   items?: Prisma.StockReservationItemListRelationFilter
+  stockReturn?: Prisma.XOR<Prisma.StockReturnNullableScalarRelationFilter, Prisma.StockReturnWhereInput> | null
 }, "id" | "idempotencyKey">
 
 export type StockReservationOrderByWithAggregationInput = {
@@ -248,6 +251,7 @@ export type StockReservationCreateInput = {
   expiresAt: Date | string
   createdAt?: Date | string
   items?: Prisma.StockReservationItemCreateNestedManyWithoutReservationInput
+  stockReturn?: Prisma.StockReturnCreateNestedOneWithoutReservationInput
 }
 
 export type StockReservationUncheckedCreateInput = {
@@ -258,6 +262,7 @@ export type StockReservationUncheckedCreateInput = {
   expiresAt: Date | string
   createdAt?: Date | string
   items?: Prisma.StockReservationItemUncheckedCreateNestedManyWithoutReservationInput
+  stockReturn?: Prisma.StockReturnUncheckedCreateNestedOneWithoutReservationInput
 }
 
 export type StockReservationUpdateInput = {
@@ -268,6 +273,7 @@ export type StockReservationUpdateInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.StockReservationItemUpdateManyWithoutReservationNestedInput
+  stockReturn?: Prisma.StockReturnUpdateOneWithoutReservationNestedInput
 }
 
 export type StockReservationUncheckedUpdateInput = {
@@ -278,6 +284,7 @@ export type StockReservationUncheckedUpdateInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.StockReservationItemUncheckedUpdateManyWithoutReservationNestedInput
+  stockReturn?: Prisma.StockReturnUncheckedUpdateOneWithoutReservationNestedInput
 }
 
 export type StockReservationCreateManyInput = {
@@ -343,6 +350,20 @@ export type EnumReservationStatusFieldUpdateOperationsInput = {
   set?: $Enums.ReservationStatus
 }
 
+export type StockReservationCreateNestedOneWithoutStockReturnInput = {
+  create?: Prisma.XOR<Prisma.StockReservationCreateWithoutStockReturnInput, Prisma.StockReservationUncheckedCreateWithoutStockReturnInput>
+  connectOrCreate?: Prisma.StockReservationCreateOrConnectWithoutStockReturnInput
+  connect?: Prisma.StockReservationWhereUniqueInput
+}
+
+export type StockReservationUpdateOneRequiredWithoutStockReturnNestedInput = {
+  create?: Prisma.XOR<Prisma.StockReservationCreateWithoutStockReturnInput, Prisma.StockReservationUncheckedCreateWithoutStockReturnInput>
+  connectOrCreate?: Prisma.StockReservationCreateOrConnectWithoutStockReturnInput
+  upsert?: Prisma.StockReservationUpsertWithoutStockReturnInput
+  connect?: Prisma.StockReservationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StockReservationUpdateToOneWithWhereWithoutStockReturnInput, Prisma.StockReservationUpdateWithoutStockReturnInput>, Prisma.StockReservationUncheckedUpdateWithoutStockReturnInput>
+}
+
 export type StockReservationCreateNestedOneWithoutItemsInput = {
   create?: Prisma.XOR<Prisma.StockReservationCreateWithoutItemsInput, Prisma.StockReservationUncheckedCreateWithoutItemsInput>
   connectOrCreate?: Prisma.StockReservationCreateOrConnectWithoutItemsInput
@@ -357,6 +378,62 @@ export type StockReservationUpdateOneRequiredWithoutItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.StockReservationUpdateToOneWithWhereWithoutItemsInput, Prisma.StockReservationUpdateWithoutItemsInput>, Prisma.StockReservationUncheckedUpdateWithoutItemsInput>
 }
 
+export type StockReservationCreateWithoutStockReturnInput = {
+  id?: string
+  idempotencyKey: string
+  requestHash: string
+  status?: $Enums.ReservationStatus
+  expiresAt: Date | string
+  createdAt?: Date | string
+  items?: Prisma.StockReservationItemCreateNestedManyWithoutReservationInput
+}
+
+export type StockReservationUncheckedCreateWithoutStockReturnInput = {
+  id?: string
+  idempotencyKey: string
+  requestHash: string
+  status?: $Enums.ReservationStatus
+  expiresAt: Date | string
+  createdAt?: Date | string
+  items?: Prisma.StockReservationItemUncheckedCreateNestedManyWithoutReservationInput
+}
+
+export type StockReservationCreateOrConnectWithoutStockReturnInput = {
+  where: Prisma.StockReservationWhereUniqueInput
+  create: Prisma.XOR<Prisma.StockReservationCreateWithoutStockReturnInput, Prisma.StockReservationUncheckedCreateWithoutStockReturnInput>
+}
+
+export type StockReservationUpsertWithoutStockReturnInput = {
+  update: Prisma.XOR<Prisma.StockReservationUpdateWithoutStockReturnInput, Prisma.StockReservationUncheckedUpdateWithoutStockReturnInput>
+  create: Prisma.XOR<Prisma.StockReservationCreateWithoutStockReturnInput, Prisma.StockReservationUncheckedCreateWithoutStockReturnInput>
+  where?: Prisma.StockReservationWhereInput
+}
+
+export type StockReservationUpdateToOneWithWhereWithoutStockReturnInput = {
+  where?: Prisma.StockReservationWhereInput
+  data: Prisma.XOR<Prisma.StockReservationUpdateWithoutStockReturnInput, Prisma.StockReservationUncheckedUpdateWithoutStockReturnInput>
+}
+
+export type StockReservationUpdateWithoutStockReturnInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.StockReservationItemUpdateManyWithoutReservationNestedInput
+}
+
+export type StockReservationUncheckedUpdateWithoutStockReturnInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  requestHash?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.StockReservationItemUncheckedUpdateManyWithoutReservationNestedInput
+}
+
 export type StockReservationCreateWithoutItemsInput = {
   id?: string
   idempotencyKey: string
@@ -364,6 +441,7 @@ export type StockReservationCreateWithoutItemsInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   createdAt?: Date | string
+  stockReturn?: Prisma.StockReturnCreateNestedOneWithoutReservationInput
 }
 
 export type StockReservationUncheckedCreateWithoutItemsInput = {
@@ -373,6 +451,7 @@ export type StockReservationUncheckedCreateWithoutItemsInput = {
   status?: $Enums.ReservationStatus
   expiresAt: Date | string
   createdAt?: Date | string
+  stockReturn?: Prisma.StockReturnUncheckedCreateNestedOneWithoutReservationInput
 }
 
 export type StockReservationCreateOrConnectWithoutItemsInput = {
@@ -398,6 +477,7 @@ export type StockReservationUpdateWithoutItemsInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stockReturn?: Prisma.StockReturnUpdateOneWithoutReservationNestedInput
 }
 
 export type StockReservationUncheckedUpdateWithoutItemsInput = {
@@ -407,6 +487,7 @@ export type StockReservationUncheckedUpdateWithoutItemsInput = {
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stockReturn?: Prisma.StockReturnUncheckedUpdateOneWithoutReservationNestedInput
 }
 
 
@@ -448,6 +529,7 @@ export type StockReservationSelect<ExtArgs extends runtime.Types.Extensions.Inte
   expiresAt?: boolean
   createdAt?: boolean
   items?: boolean | Prisma.StockReservation$itemsArgs<ExtArgs>
+  stockReturn?: boolean | Prisma.StockReservation$stockReturnArgs<ExtArgs>
   _count?: boolean | Prisma.StockReservationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["stockReservation"]>
 
@@ -481,6 +563,7 @@ export type StockReservationSelectScalar = {
 export type StockReservationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "idempotencyKey" | "requestHash" | "status" | "expiresAt" | "createdAt", ExtArgs["result"]["stockReservation"]>
 export type StockReservationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | Prisma.StockReservation$itemsArgs<ExtArgs>
+  stockReturn?: boolean | Prisma.StockReservation$stockReturnArgs<ExtArgs>
   _count?: boolean | Prisma.StockReservationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StockReservationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -490,6 +573,7 @@ export type $StockReservationPayload<ExtArgs extends runtime.Types.Extensions.In
   name: "StockReservation"
   objects: {
     items: Prisma.$StockReservationItemPayload<ExtArgs>[]
+    stockReturn: Prisma.$StockReturnPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -893,6 +977,7 @@ readonly fields: StockReservationFieldRefs;
 export interface Prisma__StockReservationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   items<T extends Prisma.StockReservation$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StockReservation$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StockReservationItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stockReturn<T extends Prisma.StockReservation$stockReturnArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StockReservation$stockReturnArgs<ExtArgs>>): Prisma.Prisma__StockReturnClient<runtime.Types.Result.GetResult<Prisma.$StockReturnPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1342,6 +1427,25 @@ export type StockReservation$itemsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.StockReservationItemScalarFieldEnum | Prisma.StockReservationItemScalarFieldEnum[]
+}
+
+/**
+ * StockReservation.stockReturn
+ */
+export type StockReservation$stockReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StockReturn
+   */
+  select?: Prisma.StockReturnSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StockReturn
+   */
+  omit?: Prisma.StockReturnOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StockReturnInclude<ExtArgs> | null
+  where?: Prisma.StockReturnWhereInput
 }
 
 /**

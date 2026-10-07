@@ -13,6 +13,9 @@ export class ProductsService {
         if (collectionId) {
             and.push({ collections: { some: { collectionId } } });
         }
+        if (query.section) {
+            and.push({ section: query.section });
+        }
         if (query.priceMin !== undefined || query.priceMax !== undefined) {
             and.push({ salePrice: { gte: query.priceMin, lte: query.priceMax } });
         }

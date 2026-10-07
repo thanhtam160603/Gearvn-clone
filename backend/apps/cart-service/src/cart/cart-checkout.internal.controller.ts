@@ -5,7 +5,7 @@ import { InternalServiceGuard } from '@app/common';
 import { CartCheckoutService } from './cart-checkout.service';
 import { CartCheckoutCleanupDto } from './dto/cart-checkout.dto';
 
-@Controller('cart-checkout')
+@Controller('internal/cart')
 @UseGuards(InternalServiceGuard)
 export class CartCheckoutInternalController {
     constructor(private readonly carts: CartCheckoutService) {}

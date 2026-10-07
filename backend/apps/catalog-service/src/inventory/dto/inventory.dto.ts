@@ -39,3 +39,15 @@ export class AvailabilityDto {
   @MaxLength(128, { each: true })
   productIds!: string[];
 }
+
+export class ReturnStockDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(128)
+  orderId!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(128)
+  reservationId!: string;
+}

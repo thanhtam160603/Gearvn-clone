@@ -61,6 +61,7 @@ export const ModelName = {
   CollectionProduct: 'CollectionProduct',
   Inventory: 'Inventory',
   StockReservation: 'StockReservation',
+  StockReturn: 'StockReturn',
   StockReservationItem: 'StockReservationItem'
 } as const
 
@@ -204,6 +205,16 @@ export const StockReservationScalarFieldEnum = {
 } as const
 
 export type StockReservationScalarFieldEnum = (typeof StockReservationScalarFieldEnum)[keyof typeof StockReservationScalarFieldEnum]
+
+
+export const StockReturnScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  reservationId: 'reservationId',
+  createdAt: 'createdAt'
+} as const
+
+export type StockReturnScalarFieldEnum = (typeof StockReturnScalarFieldEnum)[keyof typeof StockReturnScalarFieldEnum]
 
 
 export const StockReservationItemScalarFieldEnum = {

@@ -7,6 +7,7 @@ export type ProductQuery = {
     page: number;
     pageSize: number;
     sort: ProductSort;
+    section?: string;
     priceMin?: number;
     priceMax?: number;
     values: Record<string, string[]>;
@@ -19,7 +20,7 @@ export function parseProductQuery(
     raw: Record<string, unknown>,
     filterMap: ReadonlyMap<string, string> = defaultFilterMap,
 ): ProductQuery {
-    const controls = new Set(["page", "pageSize", "sort", "priceMin", "priceMax"]);
+    const controls = new Set(["page", "pageSize", "sort", "priceMin", "priceMax", "section"]);
     for (const [key, value] of Object.entries(raw)) {
         if (!controls.has(key) && !filterMap.has(key)) {
             throw new BadRequestException(`Invalid query parameter: ${key}`);
@@ -47,6 +48,11 @@ export function parseProductQuery(
     }
     const priceMin = integer("priceMin");
     const priceMax = integer("priceMax");
+    const section = raw.section;
+    if (section !== undefined &&
+        (typeof section !== "string" || !/^[a-z0-9-]{1,64}$/.test(section))) {
+        throw new BadRequestException("section không hợp lệ");
+    }
     if (priceMin !== undefined && priceMax !== undefined && priceMin > priceMax) {
         throw new BadRequestException("priceMin không được lớn hơn priceMax");
     }
@@ -70,6 +76,7 @@ export function parseProductQuery(
     }
     return {
         page, pageSize, sort: sort as ProductSort, priceMin, priceMax,
+        section: section as string | undefined,
         values: Object.fromEntries(
             [...selected].map(([key, values]) => [key, [...values]]),
         ),

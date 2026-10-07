@@ -407,6 +407,7 @@ export const ModelName = {
   CollectionProduct: 'CollectionProduct',
   Inventory: 'Inventory',
   StockReservation: 'StockReservation',
+  StockReturn: 'StockReturn',
   StockReservationItem: 'StockReservationItem'
 } as const
 
@@ -423,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "brand" | "category" | "product" | "productImage" | "productSpec" | "productAttribute" | "collection" | "collectionProduct" | "inventory" | "stockReservation" | "stockReservationItem"
+    modelProps: "brand" | "category" | "product" | "productImage" | "productSpec" | "productAttribute" | "collection" | "collectionProduct" | "inventory" | "stockReservation" | "stockReturn" | "stockReservationItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1167,6 +1168,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    StockReturn: {
+      payload: Prisma.$StockReturnPayload<ExtArgs>
+      fields: Prisma.StockReturnFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StockReturnFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StockReturnFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload>
+        }
+        findFirst: {
+          args: Prisma.StockReturnFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StockReturnFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload>
+        }
+        findMany: {
+          args: Prisma.StockReturnFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload>[]
+        }
+        create: {
+          args: Prisma.StockReturnCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload>
+        }
+        createMany: {
+          args: Prisma.StockReturnCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StockReturnCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload>[]
+        }
+        delete: {
+          args: Prisma.StockReturnDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload>
+        }
+        update: {
+          args: Prisma.StockReturnUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload>
+        }
+        deleteMany: {
+          args: Prisma.StockReturnDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StockReturnUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StockReturnUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload>[]
+        }
+        upsert: {
+          args: Prisma.StockReturnUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StockReturnPayload>
+        }
+        aggregate: {
+          args: Prisma.StockReturnAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStockReturn>
+        }
+        groupBy: {
+          args: Prisma.StockReturnGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StockReturnGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StockReturnCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StockReturnCountAggregateOutputType> | number
+        }
+      }
+    }
     StockReservationItem: {
       payload: Prisma.$StockReservationItemPayload<ExtArgs>
       fields: Prisma.StockReservationItemFieldRefs
@@ -1404,6 +1479,16 @@ export const StockReservationScalarFieldEnum = {
 } as const
 
 export type StockReservationScalarFieldEnum = (typeof StockReservationScalarFieldEnum)[keyof typeof StockReservationScalarFieldEnum]
+
+
+export const StockReturnScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  reservationId: 'reservationId',
+  createdAt: 'createdAt'
+} as const
+
+export type StockReturnScalarFieldEnum = (typeof StockReturnScalarFieldEnum)[keyof typeof StockReturnScalarFieldEnum]
 
 
 export const StockReservationItemScalarFieldEnum = {
@@ -1712,6 +1797,7 @@ export type GlobalOmitConfig = {
   collectionProduct?: Prisma.CollectionProductOmit
   inventory?: Prisma.InventoryOmit
   stockReservation?: Prisma.StockReservationOmit
+  stockReturn?: Prisma.StockReturnOmit
   stockReservationItem?: Prisma.StockReservationItemOmit
 }
 

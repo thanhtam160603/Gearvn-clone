@@ -92,6 +92,11 @@ export type Inventory = Prisma.InventoryModel
  */
 export type StockReservation = Prisma.StockReservationModel
 /**
+ * Model StockReturn
+ * 
+ */
+export type StockReturn = Prisma.StockReturnModel
+/**
  * Model StockReservationItem
  * 
  */
