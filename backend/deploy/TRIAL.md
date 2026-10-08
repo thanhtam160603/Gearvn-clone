@@ -52,7 +52,19 @@ sudo docker compose --env-file /opt/gearvn/secrets/trial.env -f compose.trial.ya
 sudo docker compose --env-file /opt/gearvn/secrets/trial.env -f compose.trial.yaml run --rm --no-deps chat-service yarn prisma migrate deploy --config apps/chat-service/prisma.config.ts
 ```
 
-Không dùng `db push`, `migrate dev` hoặc development seed trên VPS. Khởi động các ứng dụng:
+Không dùng `db push` hoặc `migrate dev` trên VPS. Migration chỉ tạo bảng, không thêm sản phẩm. Nếu đây là database **thử nghiệm mới và còn trống**, có thể nạp fixture demo một lần để thử giao diện. Kiểm tra bảng `Product` trước:
+
+```bash
+sudo docker compose --env-file /opt/gearvn/secrets/trial.env -f compose.trial.yaml exec -T postgres psql -U gearvn -d catalog_db -tAc 'SELECT count(*) FROM "Product";'
+```
+
+Chỉ khi kết quả là `0`, chạy seed trong **container tạm** với `NODE_ENV=development`. Biến này chỉ áp dụng cho lệnh seed, các service đang chạy vẫn giữ `NODE_ENV=production`. Seed demo cập nhật giá và thông tin sản phẩm, vì vậy không chạy trên database có dữ liệu thật:
+
+```bash
+sudo docker compose --env-file /opt/gearvn/secrets/trial.env -f compose.trial.yaml run --rm --no-deps -e NODE_ENV=development catalog-service yarn prisma db seed --config apps/catalog-service/prisma.config.ts
+```
+
+Khởi động các ứng dụng:
 
 ```bash
 sudo docker compose --env-file /opt/gearvn/secrets/trial.env -f compose.trial.yaml up -d identity-service catalog-service cart-service order-service chat-service api-gateway
