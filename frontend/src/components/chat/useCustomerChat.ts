@@ -186,7 +186,6 @@ export function useCustomerChat(open: boolean, userId: string | undefined, acces
   }
 
   function resetConnection() {
-    // Load the conversation again before opening a socket for the next widget session.
     setConversationId(null);
     setLoadedUserId(null);
     setStatus("loading");

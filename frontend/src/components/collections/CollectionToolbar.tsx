@@ -60,7 +60,7 @@ export default function CollectionToolbar({
                     </p>
                     <button
                     type="button"
-                    className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-50"
+                    className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-50 cursor-pointer"
                     onClick={() => setFilterPanelOpen(true)}
                     aria-haspopup="dialog"
                     aria-expanded={filterPanelOpen}
